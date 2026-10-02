@@ -1,0 +1,26 @@
+{
+  "name": "ecopuntos-pamplona",
+  "version": "1.0.0",
+  "description": "Sistema de Incentivos de Reciclaje EcoPuntos Pamplona",
+  "main": "start.js",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "node start.js",
+    "db:up": "docker-compose up -d",
+    "db:down": "docker-compose down",
+    "migrate": "npm --prefix backend run migrate:up",
+    "seed": "npm --prefix backend run seed",
+    "setup": "docker-compose up -d && npm --prefix backend run migrate:up && npm --prefix backend run seed"
+  },
+  "keywords": [
+    "ecopuntos",
+    "pamplona",
+    "reciclaje",
+    "express",
+    "postgresql",
+    "postgis",
+    "pwa"
+  ],
+  "author": "Equipo EcoPuntos Pamplona",
+  "license": "ISC"
+}

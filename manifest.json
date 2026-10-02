@@ -1,0 +1,42 @@
+{
+  "short_name": "EcoPuntos",
+  "name": "EcoPuntos Colombia — Sistema de Reciclaje Móvil",
+  "description": "Sistema Móvil de Reciclaje y Puntos Ecológicos en Colombia. Ubica puntos ecológicos, registra entregas, acumula EcoPuntos y canjea premios con aliados colombianos.",
+  "lang": "es-CO",
+  "categories": ["utilities", "lifestyle", "productivity"],
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3299/3299942.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3299/3299942.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0b1329",
+  "theme_color": "#059669",
+  "display": "standalone",
+  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Entregar Residuo",
+      "short_name": "Entregar",
+      "description": "Registra tu entrega de material reciclable",
+      "url": "./index.html#tabDeliveries",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/3299/3299942.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Buscar Puntos",
+      "short_name": "Puntos",
+      "description": "Encuentra puntos ecológicos cercanos",
+      "url": "./index.html#tabPoints",
+      "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/3299/3299942.png", "sizes": "192x192" }]
+    }
+  ]
+}

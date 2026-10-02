@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "EcoPuntos DB",
+      "Group": "Servers",
+      "Host": "ecopuntos_db",
+      "Port": 5432,
+      "MaintenanceDB": "ecopuntos",
+      "Username": "postgres",
+      "SSLMode": "prefer"
+    }
+  }
+}

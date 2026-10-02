@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#059669">
+  <meta name="description" content="EcoPuntos Colombia — Sistema Móvil de Reciclaje. Ubica puntos de reciclaje, registra entregas, acumula EcoPuntos y canjea premios con aliados colombianos.">
+  <title>EcoPuntos Colombia — Reciclaje y Puntos Ecológicos</title>
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Leaflet.js — Mapa Real con GPS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Chart.js para gráficos de impacto -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- QRCode.js — Generación de código QR del ciudadano -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Html5-QRCode — Escáner QR real por cámara (para trabajadores) -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <!-- Estilos Principales -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       PANTALLA DE LOGIN / REGISTRO (Se muestra primero)
+       ============================================================ -->
+  <div id="authScreen" class="auth-screen active">
+    <div class="auth-bg-blob"></div>
+    <div class="auth-bg-blob blob2"></div>
+
+    <div class="auth-container">
+      <!-- Logo de la App -->
+      <div class="auth-logo">
+        <div class="auth-logo-icon">
+          <i class="fa-solid fa-leaf"></i>
+        </div>
+        <h1 class="auth-app-name">EcoPuntos</h1>
+        <p class="auth-app-sub">Colombia · Sistema de Reciclaje y Puntos Ecológicos</p>
+      </div>
+
+      <!-- Pestañas Login / Registro -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="authTabLogin" onclick="ui.showAuthTab('login')">Iniciar Sesión</button>
+        <button class="auth-tab" id="authTabRegister" onclick="ui.showAuthTab('register')">Registrarse</button>
+      </div>
+
+      <!-- FORMULARIO LOGIN -->
+      <form id="loginForm" class="auth-form" onsubmit="auth.login(event)">
+        <div class="form-group">
+          <label for="loginDoc">Número de documento (CC / NIT):</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-solid fa-id-card"></i>
+            <input type="text" id="loginDoc" class="form-input" placeholder="Ej: 1234567890" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="loginPass">Contraseña:</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="loginPass" class="form-input" placeholder="••••••••" required>
+            <button type="button" class="pass-toggle" onclick="ui.togglePassword('loginPass', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div id="loginError" class="auth-error" style="display:none;"></div>
+        <button type="submit" class="btn btn-emerald btn-full auth-btn" id="btnLogin">
+          <i class="fa-solid fa-right-to-bracket"></i> Ingresar
+        </button>
+      </form>
+
+      <!-- FORMULARIO REGISTRO -->
+      <form id="registerForm" class="auth-form" style="display:none;" onsubmit="auth.register(event)">
+        <div class="form-group">
+          <label for="regName">Nombre Completo:</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="regName" class="form-input" placeholder="Ej: Carlos Rodríguez" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="regDocType">Tipo de Doc:</label>
+            <select id="regDocType" class="form-input" required>
+              <option value="CC">CC</option>
+              <option value="TI">TI</option>
+              <option value="NIT">NIT</option>
+              <option value="CE">CE</option>
+            </select>
+          </div>
+          <div class="form-group col-6">
+            <label for="regDoc">Número:</label>
+            <input type="text" id="regDoc" class="form-input" placeholder="1234567890" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="regCity">Ciudad / Municipio:</label>
+          <select id="regCity" class="form-input" required>
+            <option value="">— Seleccione —</option>
+            <option>Bogotá</option>
+            <option>Medellín</option>
+            <option>Cali</option>
+            <option>Barranquilla</option>
+            <option>Cartagena</option>
+            <option>Bucaramanga</option>
+            <option>Manizales</option>
+            <option>Pereira</option>
+            <option>Ibagué</option>
+            <option>Otro municipio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="regPhone">Celular:</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-solid fa-mobile-screen"></i>
+            <input type="tel" id="regPhone" class="form-input" placeholder="3001234567" maxlength="10" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="regPass">Contraseña:</label>
+          <div class="input-icon-wrapper">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="regPass" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+            <button type="button" class="pass-toggle" onclick="ui.togglePassword('regPass', this)">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div id="registerError" class="auth-error" style="display:none;"></div>
+        <button type="submit" class="btn btn-emerald btn-full auth-btn">
+          <i class="fa-solid fa-user-plus"></i> Crear Cuenta
+        </button>
+      </form>
+
+      <p class="auth-legal">Al registrarte aceptas los términos del programa de reciclaje conforme al <strong>Decreto 596 de 2016</strong> y la <strong>Política Nacional de Residuos Sólidos de Colombia</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       APLICACIÓN PRINCIPAL (Se muestra tras login)
+       ============================================================ -->
+  <div id="app" class="app-container" style="display:none;">
+
+    <!-- Header Móvil Superior -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo">
+          <i class="fa-solid fa-leaf text-emerald"></i>
+          <span class="brand-name">EcoPuntos<span class="brand-badge">CO</span></span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Botón de Tema -->
+        <button id="btnThemeToggle" class="icon-btn" title="Cambiar tema claro/oscuro" onclick="ui.toggleTheme()">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <!-- Botón de Notificaciones -->
+        <button id="btnNotifications" class="icon-btn" title="Notificaciones" onclick="ui.toggleNotifPanel(event)">
+          <i class="fa-regular fa-bell"></i>
+          <span class="notification-dot" id="notifDot"></span>
+        </button>
+        <!-- Botón de Perfil / Logout -->
+        <button id="btnProfile" class="icon-btn" title="Perfil y Opciones" onclick="ui.toggleProfileMenu(event)">
+          <div class="header-avatar" id="headerAvatar">JR</div>
+        </button>
+      </div>
+    </header>
+
+    <!-- Panel de Notificaciones (Dropdown) -->
+    <div id="notifPanel" class="notif-panel" style="display:none;">
+      <div class="notif-panel-header">
+        <span> Notificaciones</span>
+        <button onclick="ui.markAllNotifRead()">Marcar todas leídas</button>
+      </div>
+      <div id="notifList" class="notif-list"></div>
+    </div>
+
+    <!-- Menú de Perfil -->
+    <div id="profileMenu" class="profile-menu" style="display:none;">
+      <div class="profile-menu-header">
+        <div class="pm-avatar" id="pmAvatar">JR</div>
+        <div>
+          <div class="pm-name" id="pmName">Juan Rodríguez</div>
+          <div class="pm-role-tag" id="pmRoleTag">Ciudadano</div>
+        </div>
+      </div>
+      <div class="profile-menu-body">
+        <a class="pm-item" onclick="app.openProfileModal(); ui.toggleProfileMenu();">
+          <i class="fa-solid fa-id-card text-blue"></i> Mi Perfil Completo
+        </a>
+        <a class="pm-item" onclick="ui.switchTab('tabHome'); ui.toggleProfileMenu();">
+          <i class="fa-solid fa-house text-emerald"></i> Inicio
+        </a>
+        <a class="pm-item danger" onclick="auth.logout(); ui.toggleProfileMenu();">
+          <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+        </a>
+      </div>
+    </div>
+
+    <!-- Banner de usuario — Balance de puntos -->
+    <section class="user-summary-card">
+      <div class="user-avatar-container" onclick="app.openProfileModal()" style="cursor:pointer;" title="Ver Perfil Completo">
+        <div class="avatar" id="userAvatar">JR</div>
+        <div class="user-info">
+          <h3 id="userName">Juan Rodríguez</h3>
+          <span class="user-level-badge" id="userLevelBadge">
+            <i class="fa-solid fa-medal"></i> Reciclador Bronce
+          </span>
+          <span class="user-city-tag" id="userCityTag"> Bogotá</span>
+        </div>
+      </div>
+      <div class="points-wallet">
+        <div class="wallet-label">Balance EcoPuntos</div>
+        <div class="points-value">
+          <i class="fa-solid fa-coins text-amber"></i>
+          <span id="userPointsBalance">1,450</span>
+          <span class="points-unit">pts</span>
+        </div>
+        <div class="co2-saved">
+          <i class="fa-solid fa-cloud-arrow-down text-teal"></i>
+          <span id="userCo2Saved">34.2</span> kg CO₂ Ahorrado
+        </div>
+      </div>
+    </section>
+
+    <!-- ÁREA PRINCIPAL DE CONTENIDO MÓVIL -->
+    <main class="main-content">
+
+      <!-- ── PESTAÑA 1: INICIO Y DASHBOARD ── -->
+      <section id="tabHome" class="tab-pane active">
+        <!-- Banner dinámico por rol -->
+        <div id="roleBannerSection"></div>
+
+        <!-- Accesos Rápidos -->
+        <div class="quick-actions-grid">
+          <button class="quick-action-btn" onclick="ui.switchTab('tabDeliveries'); app.openDeliveryModal();">
+            <div class="action-icon bg-emerald-light"><i class="fa-solid fa-plus-circle text-emerald"></i></div>
+            <span>Entregar</span>
+          </button>
+          <button class="quick-action-btn" onclick="app.openQrModal();">
+            <div class="action-icon bg-blue-light"><i class="fa-solid fa-qrcode text-blue"></i></div>
+            <span>Mi QR Pase</span>
+          </button>
+          <button class="quick-action-btn" onclick="app.openScannerModal();">
+            <div class="action-icon bg-amber-light"><i class="fa-solid fa-camera text-amber"></i></div>
+            <span>Escanear QR</span>
+          </button>
+          <button class="quick-action-btn" onclick="ui.switchTab('tabPoints');">
+            <div class="action-icon bg-purple-light"><i class="fa-solid fa-location-dot text-purple"></i></div>
+            <span>Puntos</span>
+          </button>
+        </div>
+
+        <!-- Alertas de Marco Legal Colombiano -->
+        <div class="legal-info-banner">
+          <i class="fa-solid fa-scale-balanced text-amber"></i>
+          <div>
+            <strong>Marco Legal Colombia:</strong>
+            <span>Programa respaldado por la <em>Ley 1252/2008</em>, <em>Decreto 596/2016</em> y la Política PGIRS.</span>
+          </div>
+        </div>
+
+        <!-- Campaña del Mes -->
+        <div class="section-title">
+          <span> Campaña del Mes</span>
+          <a href="#" onclick="ui.switchTab('tabCampaigns'); return false;">Ver todas</a>
+        </div>
+        <div class="campaign-featured-card" id="featuredCampaignCard"></div>
+
+        <!-- Calculadora de Impacto Ecológico -->
+        <div class="section-title"><span> Calculadora de Impacto Ecológico</span></div>
+        <div class="eco-calculator-card">
+          <p class="calculator-desc">Selecciona el material y el peso para estimar cuántos EcoPuntos ganarás:</p>
+          <div class="calc-form">
+            <div class="form-group">
+              <label for="calcWasteType">Tipo de Residuo:</label>
+              <select id="calcWasteType" class="form-input"></select>
+            </div>
+            <div class="form-group">
+              <label for="calcWeight">Peso / Cantidad:</label>
+              <input type="number" id="calcWeight" class="form-input" value="3.5" min="0.1" step="0.5">
+            </div>
+          </div>
+          <div class="calc-result-box">
+            <div class="calc-res-item">
+              <span class="res-title">EcoPuntos a Ganar</span>
+              <span class="res-value text-emerald" id="calcPointsRes">+35 pts</span>
+            </div>
+            <div class="calc-res-item">
+              <span class="res-title">CO₂ Evitado</span>
+              <span class="res-value text-teal" id="calcCo2Res">5.25 kg</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gráfico de Impacto -->
+        <div class="section-title"><span> Tu Impacto Ambiental</span></div>
+        <div class="chart-container-card">
+          <canvas id="impactChart"></canvas>
+        </div>
+
+        <!-- Historial Reciente -->
+        <div class="section-title">
+          <span> Historial Reciente</span>
+          <a href="#" onclick="ui.switchTab('tabDeliveries'); return false;">Ver todo</a>
+        </div>
+        <div class="recent-deliveries-list" id="recentDeliveriesList"></div>
+      </section>
+
+      <!-- ── PESTAÑA 2: PUNTOS ECOLÓGICOS CON MAPA LEAFLET ── -->
+      <section id="tabPoints" class="tab-pane">
+        <div class="tab-header">
+          <h2> Puntos de Reciclaje</h2>
+          <p>Encuentra el punto ecológico más cercano a ti en Colombia</p>
+        </div>
+
+        <!-- Buscador y Filtros -->
+        <div class="search-filter-box">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchPointInput" placeholder="Buscar por barrio, localidad o nombre..." class="search-input">
+          </div>
+          <div class="filter-pills" id="wasteFilterPills">
+            <button class="pill-btn active" data-material="all">Todos</button>
+            <button class="pill-btn" data-material="Plástico">Plástico</button>
+            <button class="pill-btn" data-material="Vidrio">Vidrio</button>
+            <button class="pill-btn" data-material="Papel">Papel/Cartón</button>
+            <button class="pill-btn" data-material="Electrónicos">RAEE</button>
+            <button class="pill-btn" data-material="Aceite">Aceite Usado</button>
+          </div>
+        </div>
+
+        <!-- Botón GPS -->
+        <button class="btn btn-gps btn-full" onclick="mapModule.centerOnUser()">
+          <i class="fa-solid fa-location-crosshairs"></i> Usar mi Ubicación GPS
+        </button>
+
+        <!-- Mapa Leaflet Real -->
+        <div id="leafletMap" class="leaflet-map-container"></div>
+
+        <!-- Botón Admin para Nuevo Punto -->
+        <div class="admin-only-action" id="adminAddPointBtn">
+          <button class="btn btn-primary btn-full" onclick="app.openNewPointModal()">
+            <i class="fa-solid fa-plus-circle"></i> Registrar Nuevo Punto Ecológico
+          </button>
+        </div>
+
+        <!-- Lista de Puntos -->
+        <div class="points-cards-list" id="pointsCardsList"></div>
+      </section>
+
+      <!-- ── PESTAÑA 3: ENTREGAS Y ESCÁNER QR ── -->
+      <section id="tabDeliveries" class="tab-pane">
+        <div class="tab-header">
+          <h2> Registro de Entregas</h2>
+          <p>Registra o aprueba entregas de materiales reciclables</p>
+        </div>
+
+        <!-- Banner de Acción Principal -->
+        <div class="delivery-action-banner">
+          <div class="action-banner-content">
+            <h3>¿Listo para reciclar?</h3>
+            <p>Muestra tu QR en el punto de acopio, escanea un código o registra directamente tu entrega.</p>
+            <div class="banner-buttons" style="flex-wrap:wrap;">
+              <button class="btn btn-emerald" onclick="app.openDeliveryModal()">
+                <i class="fa-solid fa-hand-holding-hand"></i> Nueva Entrega
+              </button>
+              <button class="btn btn-secondary" onclick="app.openQrModal()">
+                <i class="fa-solid fa-qrcode"></i> Mi QR
+              </button>
+              <button class="btn btn-amber" onclick="app.openScannerModal()">
+                <i class="fa-solid fa-camera"></i> Escanear QR
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección de Escáner QR de Cámara -->
+        <div class="worker-box" id="workerValidationBox">
+          <div class="worker-header">
+            <i class="fa-solid fa-camera text-amber" style="font-size:1.4rem;"></i>
+            <div>
+              <h4 class="worker-title">Escáner de Cámara QR — PGIRS</h4>
+              <p class="worker-sub">Apunta la cámara del celular al código QR de un reciclador para validar su entrega</p>
+            </div>
+          </div>
+          <button class="btn btn-amber btn-full" onclick="app.openScannerModal()">
+            <i class="fa-solid fa-camera"></i> Abrir Escáner de Cámara
+          </button>
+        </div>
+
+        <!-- Filtros de Estado -->
+        <div class="section-title">
+          <span> Historial de Entregas</span>
+          <div class="delivery-filter-tags">
+            <span class="tag-filter active" onclick="app.filterDeliveries('all', this)">Todas</span>
+            <span class="tag-filter" onclick="app.filterDeliveries('approved', this)">Aprobadas</span>
+            <span class="tag-filter" onclick="app.filterDeliveries('pending', this)">Pendientes</span>
+          </div>
+        </div>
+        <div class="deliveries-full-list" id="deliveriesFullList"></div>
+      </section>
+
+      <!-- ── PESTAÑA 4: RECOMPENSAS Y CANJE ── -->
+      <section id="tabRewards" class="tab-pane">
+        <div class="tab-header">
+          <h2> Catálogo de Recompensas</h2>
+          <p>Canjea tus EcoPuntos con aliados colombianos</p>
+        </div>
+
+        <div class="rewards-balance-bar">
+          <div class="r-bal-info">
+            <span>EcoPuntos Disponibles:</span>
+            <strong id="rewardsCurrentBalance" class="text-emerald">1,450 pts</strong>
+          </div>
+          <button class="btn btn-sm btn-outline" onclick="ui.switchTab('tabDeliveries'); app.openDeliveryModal();">
+            + Ganar Puntos
+          </button>
+        </div>
+
+        <!-- Aliados colombianos destacados -->
+        <div class="allies-banner">
+          <span class="allies-label">Aliados Colombia:</span>
+          <div class="allies-logos">
+            <span class="ally-chip"> Transmilenio</span>
+            <span class="ally-chip"> Éxito / Carulla</span>
+            <span class="ally-chip"> Rappi</span>
+            <span class="ally-chip"> Bancolombia</span>
+            <span class="ally-chip"> Juan Valdez</span>
+            <span class="ally-chip"> Natura</span>
+          </div>
+        </div>
+
+        <!-- Categorías -->
+        <div class="reward-categories" id="rewardCatPills">
+          <button class="cat-pill active" data-cat="all">Todos</button>
+          <button class="cat-pill" data-cat="transporte">Transporte</button>
+          <button class="cat-pill" data-cat="descuentos">Descuentos</button>
+          <button class="cat-pill" data-cat="ecoproductos">Eco-Productos</button>
+          <button class="cat-pill" data-cat="arboles">Siembra Árboles</button>
+        </div>
+
+        <!-- Mis Cupones -->
+        <div class="section-title"><span> Mis Cupones Activos</span></div>
+        <div class="my-vouchers-slider" id="myVouchersSlider"></div>
+
+        <!-- Catálogo -->
+        <div class="section-title"><span>⭐ Recompensas Disponibles</span></div>
+        <div class="rewards-grid" id="rewardsGrid"></div>
+      </section>
+
+      <!-- ── PESTAÑA 5: CAMPAÑAS Y RANKING ── -->
+      <section id="tabCampaigns" class="tab-pane">
+        <div class="tab-header">
+          <h2> Campañas y Ranking</h2>
+          <p>Competencias comunitarias de reciclaje en Colombia</p>
+        </div>
+
+        <div class="subtab-switcher">
+          <button class="subtab-btn active" onclick="ui.switchSubtab('ranking', this)"> Ranking</button>
+          <button class="subtab-btn" onclick="ui.switchSubtab('campaigns', this)"> Campañas</button>
+          <button class="subtab-btn" onclick="ui.switchSubtab('badges', this)"> Medallas</button>
+        </div>
+
+        <div id="subtabRanking" class="subtab-pane active">
+          <div class="podium-container" id="podiumContainer"></div>
+          <div class="ranking-table-card">
+            <div class="ranking-header">
+              <span>Pos</span><span>Reciclador</span><span>Residuos</span><span>Puntos</span>
+            </div>
+            <div class="ranking-list" id="rankingList"></div>
+          </div>
+        </div>
+
+        <div id="subtabCampaigns" class="subtab-pane">
+          <div class="campaigns-list" id="campaignsFullList"></div>
+        </div>
+
+        <div id="subtabBadges" class="subtab-pane">
+          <div class="badges-grid" id="badgesGrid"></div>
+        </div>
+      </section>
+
+      <!-- ── PESTAÑA 6: PANEL ADMINISTRADOR ── -->
+      <section id="tabAdmin" class="tab-pane admin-only-section">
+        <div class="tab-header">
+          <h2> Panel de Administración</h2>
+          <p>Gestión del programa PGIRS — Colombia</p>
+        </div>
+
+        <!-- Métricas Globales -->
+        <div class="admin-metrics-grid">
+          <div class="admin-metric-card">
+            <i class="fa-solid fa-users text-blue"></i>
+            <div class="am-value" id="adminTotalUsers">5</div>
+            <div class="am-label">Usuarios registrados</div>
+          </div>
+          <div class="admin-metric-card">
+            <i class="fa-solid fa-box-archive text-emerald"></i>
+            <div class="am-value" id="adminTotalDeliveries">3</div>
+            <div class="am-label">Entregas totales</div>
+          </div>
+          <div class="admin-metric-card">
+            <i class="fa-solid fa-weight-hanging text-amber"></i>
+            <div class="am-value" id="adminTotalKg">8.5</div>
+            <div class="am-label">Kg recolectados</div>
+          </div>
+          <div class="admin-metric-card">
+            <i class="fa-solid fa-cloud text-teal"></i>
+            <div class="am-value" id="adminTotalCo2">19.5</div>
+            <div class="am-label">Kg CO₂ evitado</div>
+          </div>
+        </div>
+
+        <!-- Gráfico Admin -->
+        <div class="section-title"><span> Residuos por Material (Total)</span></div>
+        <div class="chart-container-card">
+          <canvas id="adminChart"></canvas>
+        </div>
+
+        <!-- Gestión de Entregas Pendientes (Aprobación Admin) -->
+        <div class="section-title">
+          <span>⏳ Entregas Pendientes de Aprobación</span>
+          <span id="pendingCountBadge" class="count-badge">0</span>
+        </div>
+        <div id="adminPendingList" class="admin-pending-list"></div>
+
+        <!-- Crear Gestor de Punto (Solo Administrador) -->
+        <div class="section-title"><span> Crear Nuevo Gestor de Punto</span></div>
+        <div class="admin-card" style="background:var(--bg-card);padding:14px;border-radius:var(--radius-md);border:1px solid var(--border-color);margin-bottom:14px;">
+          <form id="createGestorForm" onsubmit="app.submitCreateGestor(event)">
+            <div class="form-group">
+              <label for="gestorName">Nombre del Gestor:</label>
+              <input type="text" id="gestorName" class="form-input" placeholder="Ej: Pedro Gómez" required>
+            </div>
+            <div class="form-group">
+              <label for="gestorEmail">Correo Electrónico:</label>
+              <input type="email" id="gestorEmail" class="form-input" placeholder="gestor@ecopuntos.com" required>
+            </div>
+            <div class="form-group">
+              <label for="gestorPass">Contraseña:</label>
+              <input type="password" id="gestorPass" class="form-input" placeholder="Mínimo 6 caracteres" minlength="6" required>
+            </div>
+            <button type="submit" class="btn btn-emerald btn-full">
+              <i class="fa-solid fa-user-shield"></i> Crear / Autorizar Gestor de Punto
+            </button>
+          </form>
+        </div>
+
+        <!-- Gestión de Usuarios y Gestores -->
+        <div class="section-title"><span> Gestores de Punto Autorizados</span></div>
+        <div id="adminGestoresList" class="admin-users-list"></div>
+
+        <!-- Botones de gestión rápida -->
+        <div class="admin-quick-actions">
+          <button class="btn btn-primary btn-full" onclick="app.openNewPointModal()">
+            <i class="fa-solid fa-plus"></i> Agregar Punto Ecológico
+          </button>
+          <button class="btn btn-amber btn-full mt-2" onclick="app.openNewCampaignModal()">
+            <i class="fa-solid fa-bullhorn"></i> Crear Nueva Campaña
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BARRA DE NAVEGACIÓN INFERIOR (MOBILE DOCK) -->
+    <nav class="mobile-dock" id="mobileDock">
+      <button class="dock-item active" id="dockHome" onclick="ui.switchTab('tabHome', this)">
+        <i class="fa-solid fa-house"></i><span>Inicio</span>
+      </button>
+      <button class="dock-item" id="dockPoints" onclick="ui.switchTab('tabPoints', this); mapModule.initMap();">
+        <i class="fa-solid fa-location-dot"></i><span>Puntos</span>
+      </button>
+      <button class="dock-item dock-center-btn" id="dockRecycle" onclick="ui.switchTab('tabDeliveries', this); app.openDeliveryModal();">
+        <div class="dock-circle-icon"><i class="fa-solid fa-recycle"></i></div>
+        <span>Reciclar</span>
+      </button>
+      <button class="dock-item" id="dockRewards" onclick="ui.switchTab('tabRewards', this)">
+        <i class="fa-solid fa-gift"></i><span>Premios</span>
+      </button>
+      <button class="dock-item" id="dockRanking" onclick="ui.switchTab('tabCampaigns', this)">
+        <i class="fa-solid fa-trophy"></i><span>Ranking</span>
+      </button>
+    </nav>
+
+    <!-- DOCK ITEM ADMIN (se agrega dinámicamente si el rol es admin) -->
+
+  </div><!-- fin #app -->
+
+
+  <!-- ════════════════════════════════
+       MODALES
+       ════════════════════════════════ -->
+
+  <!-- MODAL: Nueva Entrega -->
+  <div id="deliveryModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3> Registrar Nueva Entrega</h3>
+        <button class="modal-close" onclick="app.closeModal('deliveryModal')">&times;</button>
+      </div>
+      <form id="deliveryForm" onsubmit="app.submitDelivery(event)">
+        <div class="form-group">
+          <label for="delPointSelect">Punto Ecológico:</label>
+          <select id="delPointSelect" class="form-input" required></select>
+        </div>
+        <div class="form-group">
+          <label for="delWasteSelect">Material Reciclable:</label>
+          <select id="delWasteSelect" class="form-input" onchange="app.updateDeliveryCalc()" required></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="delAmountInput">Peso / Cantidad:</label>
+            <input type="number" id="delAmountInput" class="form-input" min="0.1" step="0.1" value="2.0" oninput="app.updateDeliveryCalc()" required>
+          </div>
+          <div class="form-group col-6">
+            <label>Unidad:</label>
+            <input type="text" id="delUnitDisplay" class="form-input" value="Kg" readonly style="opacity:0.6;">
+          </div>
+        </div>
+        <div class="modal-calc-preview">
+          <div><span>EcoPuntos a recibir:</span><strong id="modalCalcPoints" class="text-emerald">+20 pts</strong></div>
+          <div><span>CO₂ Evitado:</span><strong id="modalCalcCo2" class="text-teal">3.0 kg</strong></div>
+        </div>
+        <div class="form-group">
+          <label for="delNotes">Observaciones (Opcional):</label>
+          <input type="text" id="delNotes" class="form-input" placeholder="Ej: 5 botellas PET limpias y sin tapa">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('deliveryModal')">Cancelar</button>
+          <button type="submit" class="btn btn-emerald"><i class="fa-solid fa-paper-plane"></i> Registrar Entrega</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: QR Pase del Ciudadano -->
+  <div id="qrModal" class="modal-backdrop">
+    <div class="modal-card text-center">
+      <div class="modal-header">
+        <h3> Tu Pase QR de Reciclador</h3>
+        <button class="modal-close" onclick="app.closeModal('qrModal')">&times;</button>
+      </div>
+      <p class="modal-sub">Muestra este QR al encargado del punto ecológico para registrar tu entrega.</p>
+      <div class="qr-container-box"><div id="qrcodeDisplay"></div></div>
+      <div class="user-qr-code-text">Código: <strong id="qrCodeUserText">ECO-CO-0000</strong></div>
+      <p style="font-size:0.72rem;color:var(--text-muted);margin-top:8px;">
+        Registro respaldado por el programa <strong>Bogotá / Colombia Recicla</strong> — UAESP
+      </p>
+      <button class="btn btn-emerald btn-full" style="margin-top:12px;" onclick="app.closeModal('qrModal')">Entendido</button>
+    </div>
+  </div>
+
+  <!-- MODAL: Escáner QR Real (Trabajadores/Admin) -->
+  <div id="scannerModal" class="modal-backdrop">
+    <div class="modal-card text-center">
+      <div class="modal-header">
+        <h3> Escáner QR — Gestor de Punto</h3>
+        <button class="modal-close" onclick="app.closeScannerModal()">&times;</button>
+      </div>
+      <p class="modal-sub">Apunta la cámara al código QR del reciclador para validar su entrega:</p>
+      <!-- Contenedor del escáner Html5QrCode -->
+      <div id="html5QrCodeScanner" style="width:100%;min-height:200px;"></div>
+      <div id="scannerStatus" class="scanner-status-text"></div>
+      <div class="scanner-sim-actions">
+        <p class="text-muted" style="font-size:0.75rem;">— o probar con dato de ejemplo —</p>
+        <button class="btn btn-sm btn-amber" onclick="app.simulateQrScan(JSON.stringify({id: 1, app: 'ecopuntos-pamplona'}))">
+           Simular escaneo: Juan Rodríguez
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Perfil de Usuario Completo -->
+  <div id="profileModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3> Mi Perfil de Reciclador</h3>
+        <button class="modal-close" onclick="app.closeModal('profileModal')">&times;</button>
+      </div>
+      <div class="profile-modal-content">
+        <div style="text-align:center;margin-bottom:14px;">
+          <div class="avatar" id="profModalAvatar" style="width:64px;height:64px;font-size:1.5rem;margin:0 auto 8px;">JR</div>
+          <h3 id="profModalName" style="font-size:1.1rem;">Juan Rodríguez</h3>
+          <span class="user-level-badge" id="profModalLevel"><i class="fa-solid fa-medal"></i> Reciclador Bronce</span>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:12px;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;font-size:0.83rem;">
+          <div><span class="text-muted">Documento:</span> <strong id="profModalDoc">CC 1001</strong></div>
+          <div><span class="text-muted">ID de Usuario:</span> <strong id="profModalId" class="text-emerald">ECO-CO-1001</strong></div>
+          <div><span class="text-muted">Teléfono / Celular:</span> <strong id="profModalPhone">3001234567</strong></div>
+          <div><span class="text-muted">Ciudad:</span> <strong id="profModalCity">Bogotá</strong></div>
+          <div><span class="text-muted">Rol en Sistema:</span> <strong id="profModalRole">Ciudadano</strong></div>
+          <div><span class="text-muted">Balance EcoPuntos:</span> <strong id="profModalPoints" class="text-amber">1,450 pts</strong></div>
+          <div><span class="text-muted">CO₂ Ahorrado:</span> <strong id="profModalCo2" class="text-teal">34.2 kg</strong></div>
+        </div>
+
+        <div class="modal-footer" style="flex-direction:column;gap:8px;">
+          <button class="btn btn-secondary btn-full" onclick="app.openQrModal(); app.closeModal('profileModal');">
+            <i class="fa-solid fa-qrcode text-blue"></i> Ver mi Pase QR
+          </button>
+          <button class="btn btn-danger btn-full" onclick="auth.logout(); app.closeModal('profileModal');">
+            <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Canje de Recompensa -->
+  <div id="rewardModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="rewModalTitle">Canjear Recompensa</h3>
+        <button class="modal-close" onclick="app.closeModal('rewardModal')">&times;</button>
+      </div>
+      <div class="reward-modal-body">
+        <div class="rew-modal-icon-wrapper" id="rewModalIcon"><i class="fa-solid fa-gift"></i></div>
+        <p class="rew-modal-desc" id="rewModalDesc">Descripción del premio...</p>
+        <div class="rew-modal-cost-box">
+          <span>Costo en EcoPuntos:</span>
+          <strong id="rewModalCost" class="text-amber">500 pts</strong>
+        </div>
+        <div id="rewModalWarning" class="alert-warning" style="display:none;">
+           No tienes suficientes EcoPuntos para este canje.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="app.closeModal('rewardModal')">Cancelar</button>
+        <button type="button" id="btnConfirmRedeem" class="btn btn-emerald" onclick="app.confirmRedeemReward()">
+          <i class="fa-solid fa-check-circle"></i> Confirmar Canje
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Nuevo Punto Ecológico (Admin) -->
+  <div id="newPointModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3> Agregar Punto Ecológico</h3>
+        <button class="modal-close" onclick="app.closeModal('newPointModal')">&times;</button>
+      </div>
+      <form id="newPointForm" onsubmit="app.submitNewPoint(event)">
+        <div class="form-group">
+          <label for="npName">Nombre del Punto:</label>
+          <input type="text" id="npName" class="form-input" placeholder="Ej: Punto Limpio Chapinero" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="npCity">Ciudad:</label>
+            <select id="npCity" class="form-input" required>
+              <option>Bogotá</option><option>Medellín</option><option>Cali</option>
+              <option>Barranquilla</option><option>Cartagena</option><option>Bucaramanga</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="form-group col-6">
+            <label for="npDistrict">Localidad / Barrio:</label>
+            <input type="text" id="npDistrict" class="form-input" placeholder="Chapinero" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="npAddress">Dirección:</label>
+          <input type="text" id="npAddress" class="form-input" placeholder="Cra 7 # 45-20" required>
+        </div>
+        <div class="form-group">
+          <label for="npHours">Horarios:</label>
+          <input type="text" id="npHours" class="form-input" value="Lun - Sáb: 8:00 AM - 5:00 PM" required>
+        </div>
+        <div class="form-group">
+          <label for="npManager">Encargado PGIRS:</label>
+          <input type="text" id="npManager" class="form-input" placeholder="Nombre del gestor" required>
+        </div>
+        <div class="form-group">
+          <label>Materiales aceptados:</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="npMaterials" value="Plástico" checked> Plástico</label>
+            <label><input type="checkbox" name="npMaterials" value="Vidrio" checked> Vidrio</label>
+            <label><input type="checkbox" name="npMaterials" value="Papel/Cartón" checked> Papel/Cartón</label>
+            <label><input type="checkbox" name="npMaterials" value="Metal"> Metal / Chatarra</label>
+            <label><input type="checkbox" name="npMaterials" value="Electrónicos"> RAEE (Electrónicos)</label>
+            <label><input type="checkbox" name="npMaterials" value="Aceite Usado"> Aceite Usado</label>
+            <label><input type="checkbox" name="npMaterials" value="Pilas"> Pilas y Baterías</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('newPointModal')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Punto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Nueva Campaña (Admin) -->
+  <div id="newCampaignModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3> Crear Campaña Ecológica</h3>
+        <button class="modal-close" onclick="app.closeModal('newCampaignModal')">&times;</button>
+      </div>
+      <form id="newCampaignForm" onsubmit="app.submitNewCampaign(event)">
+        <div class="form-group">
+          <label for="ncTitle">Título de la Campaña:</label>
+          <input type="text" id="ncTitle" class="form-input" placeholder="Ej: Semana Verde Bogotá 2026" required>
+        </div>
+        <div class="form-group">
+          <label for="ncDesc">Descripción:</label>
+          <input type="text" id="ncDesc" class="form-input" placeholder="Meta y objetivo de la campaña" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="ncTarget">Meta (Kg):</label>
+            <input type="number" id="ncTarget" class="form-input" value="1000" min="50" required>
+          </div>
+          <div class="form-group col-6">
+            <label for="ncBonus">Puntos Bonus:</label>
+            <input type="number" id="ncBonus" class="form-input" value="200" min="50" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ncDays">Días de duración:</label>
+          <input type="number" id="ncDays" class="form-input" value="30" min="1" max="90" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('newCampaignModal')">Cancelar</button>
+          <button type="submit" class="btn btn-emerald">Publicar Campaña</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST DE NOTIFICACIÓN -->
+  <div id="toastNotification" class="toast-notification">
+    <i class="toast-icon fa-solid fa-circle-check"></i>
+    <span class="toast-message" id="toastMessage">Operación realizada con éxito</span>
+  </div>
+
+  <!-- Scripts del Sistema -->
+  <script src="apiClient.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(r => console.log('SW Registrado:', r.scope))
+          .catch(e => console.warn('SW Error:', e));
+      });
+    }
+  </script>
+</body>
+</html>
