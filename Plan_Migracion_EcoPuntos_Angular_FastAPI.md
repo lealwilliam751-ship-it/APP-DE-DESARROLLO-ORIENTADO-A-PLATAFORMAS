@@ -1,39 +1,36 @@
 # Plan de trabajo: EcoPuntos Pamplona → Angular + FastAPI + PostgreSQL
 
-Documento maestro adaptado a la **Rúbrica de Evaluación de Desarrollo Orientado a Plataformas (100 pts obligatorios + 10 pts opcionales)**. Pensado para guiar la migración y poder ser compartido en cualquier momento de desarrollo.
+Documento maestro del proceso de migracion tecnologica de EcoPuntos Pamplona. Guia la transicion del stack original (Vanilla JS + Express) al stack actual (Angular + FastAPI + PostgreSQL).
 
 ---
 
 ## 1. Contexto del Proyecto
 
 - **Materia:** Desarrollo Orientado a Plataformas (Universidad de Pamplona).
-- **Rúbrica Oficial:** 100 puntos obligatorios + 10 puntos de bonificación opcionales (Git + Despliegue en Nube). Exige **Angular + API REST (FastAPI / Django REST) + PostgreSQL**.
+- **Requerimientos tecnicos:** Angular + API REST (FastAPI / Django REST) + PostgreSQL.
 - **Proyecto actual:** EcoPuntos Pamplona, desarrollado originalmente en Vanilla JS (PWA) + Node.js/Express + PostgreSQL 15 con PostGIS 3.3.
 - **Objetivo de Migración:** Reescribir el Frontend en **Angular** (Componentes Standalone, Services, ReactiveForms, Guards, Interceptors) y el Backend en **FastAPI** (Python 3.11+, Pydantic v2, SQLAlchemy, JWT, OAuth2, Uvicorn), manteniendo la base de datos PostgreSQL/PostGIS.
 
 ---
 
-## 2. Alineación Completa con la Rúbrica de Evaluación
+## 2. Funcionalidades Implementadas por Modulo
 
-| # | Criterio de Rúbrica | Pts | Estado Actual | Estrategia de Cumplimiento (Excelente) |
-|---|---|---|---|---|
-| 1 | **Mockups y planificación** | 6 | Pendiente | Crear mockups para todas las vistas: login, registro, dashboards por rol, listas, detalles, formularios de creación/edición. |
-| 2 | **Arquitectura y organización** | 5 | Monolítico | Modularización estricta: `frontend/` (Angular standalone, services, guards) y `backend/` (routers, schemas, models, services). |
-| 3 | **Desarrollo Frontend Angular** | 9 | No iniciado | Angular 17/18 CLI, standalone components, ReactiveForms, RxJS, HttpClient, Guards por rol e Interceptors JWT/Error. |
-| 4 | **Backend y API REST (FastAPI)** | 9 | No iniciado | FastAPI + Pydantic v2. Endpoints GET, POST, PUT/PATCH, DELETE. Respuestas JSON estandarizadas, validación 422 y HTTP status codes correctos. |
-| 5 | **Diseño y Diagrama BD** | 8 | Parcial (SQL) | Diagrama ER completo (Mermaid/PNG) especificando PK, FK, cardinalidades (1..N, N..N) y atributos exactos de las 10 tablas. |
-| 6 | **Normalización de tablas** | 7 | Realizada | Explicación detallada de 1FN, 2FN y 3FN aplicada a las tablas del sistema (`users`, `deliveries`, `materials`, `campaign_participants`). |
-| 7 | **Integración Angular → API → PostgreSQL** | 10 | No iniciada | Comunicación HTTP fluida entre capas con persistencia real en PostgreSQL, manejo de spiners de carga, notificaciones de éxito y error. |
-| 8 | **CRUD y reglas de negocio** | 9 | Incompleto | Operaciones CRUD completas para Ecopuntos, Materiales, Premios, Campañas y Entregas. Validaciones de stock, puntos, peso y transacciones ACID. |
-| 9 | **Autenticación, roles y seguridad** | 7 | Parcial | Autenticación JWT, contraseñas hashed con `bcrypt`, roles (Ciudadano, Gestor_de_Punto, Administrador), Guards en Angular y dependencias en FastAPI. Variables de entorno seguras. |
-| 10 | **Ejecución y despliegue local** | 8 | Funcional DB | `docker-compose.yml` para PostgreSQL/PostGIS. Script de inicio y README detallado con comandos para Angular (4200), FastAPI (3000) y Postgres (5432). |
-| 11 | **Interfaz y UX** | 4 | Buena base | Diseño UI moderno, responsive, adaptable a dispositivos, retroalimentación al usuario (toasts/alerts), estados de carga y manejo de errores visible. |
-| 12 | **Calidad del código y documentación** | 4 | En proceso | Código limpio (Clean Code), separación de conceptos, sin código muerto, docstrings en FastAPI y README paso a paso. |
-| 13 | **Conocimiento del código** | 8 | Asimilación | Explicación clara de servicios, modelos, routers y flujo de datos end-to-end. Preparación para modificaciones en vivo durante la sustentación. |
-| 14 | **Pruebas y demostración** | 3 | Pendiente | Suite de pruebas unitarias/integración con `pytest` + `httpx`, ensayando demostración de flujos normales y escenarios de error. |
-| 15 | **Mejoras adicionales** | 3 | Definidas | Gráficas estadísticas con Chart.js, geolocalización PostGIS para ecopuntos cercanos, escáner QR de entregas/canjes y soporte PWA/Docker. |
-| **B1** | **Bonificación Git / GitHub** | +5 | Recomendado | Repositorio Git con commits frecuentes y semánticos, ramas por característica (`feature/*`), README y `.gitignore` adecuado. |
-| **B2** | **Bonificación Nube** | +5 | Opcional | Despliegue en la nube: Frontend (Vercel/Netlify), Backend (Render/Railway), BD (Supabase/Neon). |
+| # | Modulo | Estado | Descripcion |
+|---|---|---|---|
+| 1 | **Mockups y planificacion** | Completo | Mockups para todas las vistas: login, registro, dashboards por rol, listas, detalles, formularios de creacion/edicion. |
+| 2 | **Arquitectura y organizacion** | Completo | Modularizacion estricta: `frontend/` (Angular standalone, services, guards) y `fastapi_backend/` (routers, schemas, models). |
+| 3 | **Desarrollo Frontend Angular** | Completo | Angular 22 CLI, standalone components, ReactiveForms, RxJS, HttpClient, Guards por rol e Interceptors JWT/Error. |
+| 4 | **Backend y API REST (FastAPI)** | Completo | FastAPI + Pydantic v2. Endpoints GET, POST, PUT/PATCH, DELETE. Respuestas JSON estandarizadas y HTTP status codes correctos. |
+| 5 | **Diseno y Diagrama BD** | Completo | Diagrama ER completo (Mermaid) especificando PK, FK, cardinalidades (1..N, N..N) y atributos de las 10 tablas. |
+| 6 | **Normalizacion de tablas** | Completo | Explicacion detallada de 1FN, 2FN y 3FN aplicada a las tablas del sistema. |
+| 7 | **Integracion Angular → API → PostgreSQL** | Completo | Comunicacion HTTP fluida entre capas con persistencia real en PostgreSQL. |
+| 8 | **CRUD y reglas de negocio** | Completo | Operaciones CRUD completas para Ecopuntos, Materiales, Premios, Campanas y Entregas. Transacciones ACID. |
+| 9 | **Autenticacion, roles y seguridad** | Completo | Autenticacion JWT, contrasenas hashed con `bcrypt`, tres roles diferenciados, Guards en Angular y dependencias en FastAPI. |
+| 10 | **Ejecucion y despliegue local** | Completo | `docker-compose.yml` para PostgreSQL/PostGIS. README detallado con todos los comandos. |
+| 11 | **Interfaz y UX** | Completo | Diseno UI moderno, responsive, retroalimentacion al usuario (toasts/alerts), estados de carga. |
+| 12 | **Calidad del codigo y documentacion** | Completo | Clean Code, separacion de conceptos, docstrings en FastAPI y README paso a paso. |
+| 13 | **Pruebas automatizadas** | Completo | Suite pytest + httpx: flujos normales y escenarios de error. |
+| 14 | **Mejoras adicionales** | Completo | Geolocalizacion PostGIS para ecopuntos cercanos, escanер QR de entregas/canjes y soporte Docker. |
 
 ---
 
@@ -68,7 +65,7 @@ Documento maestro adaptado a la **Rúbrica de Evaluación de Desarrollo Orientad
 
 ## 4. Fases de Ejecución del Proyecto
 
-### Fase 1: Planificación, Mockups, Diagrama ER y Normalización (~21 pts)
+### Fase 1: Planificacion, Mockups, Diagrama ER y Normalizacion
 1. **Mockups de Interfaz:** Diseñar o generar prototipos visuales claros para todas las pantallas principales (Login, Registro, Dashboard Ciudadano, Dashboard Gestor, Dashboard Admin, Mapa Interactivo, Formulario de Entrega, Catálogo de Premios, Ranking y CRUDs de administración).
 2. **Diagrama ER:** Crear diagrama con notación limpia (Mermaid / Draw.io) indicando PK, FK, tipos de datos, relaciones 1..N y N..N.
 3. **Documento de Normalización:**

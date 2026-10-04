@@ -1,6 +1,6 @@
 # Documentación de Base de Datos y Normalización: EcoPuntos Pamplona
 
-Este documento constituye la evidencia técnica oficial para cumplir con los criterios **5 (Diseño y Diagrama de Base de Datos - 8 pts)** y **6 (Normalización de Tablas - 7 pts)** de la Rúbrica de Evaluación de Desarrollo Orientado a Plataformas.
+Documentacion tecnica del diseno relacional de la base de datos del sistema EcoPuntos Pamplona. Incluye diagrama ERD y proceso de normalizacion hasta Tercera Forma Normal (3FN).
 
 ---
 
