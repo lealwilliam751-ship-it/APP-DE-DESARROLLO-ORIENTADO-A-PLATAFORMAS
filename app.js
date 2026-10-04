@@ -1375,9 +1375,13 @@ const app = {
     const matIdMap = { 'plastico': 1, 'carton': 2, 'vidrio': 3, 'metal': 4 };
     const materialId = matIdMap[wasteId] || 1;
 
+    let realDeliveryId = null;
     try {
       if (window.apiClient && localStorage.getItem('ecopuntos_jwt')) {
-        await apiClient.deliveries.create(epId, materialId, amount);
+        const apiRes = await apiClient.deliveries.create(epId, materialId, amount);
+        if (apiRes && apiRes.delivery) {
+          realDeliveryId = apiRes.delivery.deliveryId;
+        }
         const updatedUser = await apiClient.auth.getProfile();
         if (updatedUser) {
           user.points = updatedUser.points;
@@ -1389,7 +1393,8 @@ const app = {
     }
 
     const newDel = {
-      id: `DEL-CO-${Date.now().toString().slice(-5)}`,
+      id: realDeliveryId ? realDeliveryId : `DEL-CO-${Date.now().toString().slice(-5)}`,
+      apiId: realDeliveryId,
       userId: user.id,
       pointName, wasteName: waste.name, amount, unit: waste.unit,
       points: pts, co2,
@@ -1408,9 +1413,6 @@ const app = {
       DB.updateUser(user);
     }
 
-    const leaderUser = STATE.leaderboard.find(l => l.name.includes(user.name.split(' ')[0]));
-    if (leaderUser) { leaderUser.weightKg += amount; }
-
     this.closeModal('deliveryModal');
     ui.renderAll();
     STATE.notifications.unshift({ id: Date.now(), icon: '', text: `Entrega ${newDel.id} registrada. ${user.role !== 'citizen' ? `+${pts} pts acreditados.` : 'Pendiente de aprobación del gestor.'}`, time: 'Ahora', read: false });
@@ -1420,12 +1422,14 @@ const app = {
 
   // ── Aprobación desde admin / gestor ──
   async approveDelivery(deliveryId) {
-    const del = STATE.deliveries.find(d => d.id === deliveryId);
+    const del = STATE.deliveries.find(d => d.id == deliveryId || d.apiId == deliveryId);
     if (del) del.status = 'approved';
+
+    const targetId = (del && del.apiId) ? del.apiId : deliveryId;
 
     try {
       if (window.apiClient) {
-        await apiClient.deliveries.approve(deliveryId);
+        await apiClient.deliveries.approve(targetId);
         // Reload live ranking so the updated citizen points show up in Leaderboard right away
         const ranking = await apiClient.ranking.getTop(10);
         if (ranking && ranking.length) STATE.leaderboard = ranking;

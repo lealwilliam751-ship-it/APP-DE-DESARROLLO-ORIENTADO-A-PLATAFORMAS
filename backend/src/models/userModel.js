@@ -12,12 +12,33 @@ const userModel = {
   },
 
   async getUserByEmail(emailOrDoc) {
-    const cleanInput = (emailOrDoc || '').trim();
+    const cleanInput = (emailOrDoc || '').trim().toLowerCase();
+    const docMap = {
+      '9001': 'admin@ecopuntos.com',
+      '2002': 'gestor@ecopuntos.com',
+      '1001': '1001@ecopuntos.com'
+    };
+    const mappedEmail = docMap[cleanInput];
     const emailWithDomain = cleanInput.includes('@') ? cleanInput : `${cleanInput}@ecopuntos.com`;
-    const result = await query(
-      `SELECT * FROM users WHERE LOWER(email) = LOWER($1) OR LOWER(email) = LOWER($2)`,
-      [cleanInput, emailWithDomain]
-    );
+
+    let queryText = `
+      SELECT * FROM users 
+      WHERE LOWER(email) = LOWER($1) 
+         OR LOWER(email) = LOWER($2)
+    `;
+    const params = [cleanInput, emailWithDomain];
+
+    if (mappedEmail) {
+      queryText += ` OR LOWER(email) = LOWER($${params.length + 1})`;
+      params.push(mappedEmail);
+    }
+
+    if (/^\d+$/.test(cleanInput)) {
+      queryText += ` OR id = $${params.length + 1}`;
+      params.push(parseInt(cleanInput, 10));
+    }
+
+    const result = await query(queryText + ` LIMIT 1`, params);
     return result.rows[0];
   },
 

@@ -2,20 +2,29 @@ const { query } = require('../config/db');
 
 // Level thresholds
 function calculateLevel(totalPoints) {
-  if (totalPoints >= 10000) return 'Héroe Ecológico';
-  if (totalPoints >= 5000) return 'Reciclador Oro';
-  if (totalPoints >= 2000) return 'Reciclador Plata';
-  if (totalPoints >= 500) return 'Reciclador Bronce';
+  if (totalPoints >= 1200) return 'Héroe Ambiental';
+  if (totalPoints >= 800) return 'Guardián del Planeta';
+  if (totalPoints >= 500) return 'Eco Guerrero';
+  if (totalPoints >= 200) return 'Brote Verde';
   return 'Semilla Verde';
 }
 
 const rankingModel = {
   async getTopRanking(limit = 10, city = 'Pamplona') {
     const result = await query(
-      `SELECT id, name, total_points, level, default_city
-       FROM users
-       WHERE role = 'Ciudadano' AND default_city = $1
-       ORDER BY total_points DESC
+      `SELECT 
+         u.id, 
+         u.name, 
+         u.total_points, 
+         u.level, 
+         u.default_city,
+         ROUND(COALESCE(SUM(di.weight_kg), (u.total_points / 40.0)), 1)::float AS total_kg
+       FROM users u
+       LEFT JOIN deliveries d ON d.user_id = u.id AND d.status = 'approved'
+       LEFT JOIN delivery_items di ON di.delivery_id = d.id
+       WHERE u.role = 'Ciudadano' AND u.default_city = $1
+       GROUP BY u.id, u.name, u.total_points, u.level, u.default_city
+       ORDER BY u.total_points DESC
        LIMIT $2`,
       [city, limit]
     );
@@ -23,6 +32,7 @@ const rankingModel = {
     return result.rows.map((user, idx) => ({
       position: idx + 1,
       ...user,
+      total_kg: parseFloat(user.total_kg || 0),
       level: calculateLevel(user.total_points)
     }));
   },

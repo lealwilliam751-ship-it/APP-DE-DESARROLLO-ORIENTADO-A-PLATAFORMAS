@@ -32,11 +32,22 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(login_in: UserLogin, db: Session = Depends(get_db)):
     # Match email or document ID
-    user = db.query(User).filter(User.email == login_in.email).first()
+    clean_email = login_in.email.strip().lower()
+    user = db.query(User).filter(User.email.ilike(clean_email)).first()
     if not user:
-        # Check if email input was user ID integer
-        if login_in.email.isdigit():
-            user = db.query(User).filter(User.id == int(login_in.email)).first()
+        doc_map = {
+            "9001": "admin@ecopuntos.com",
+            "2002": "gestor@ecopuntos.com",
+            "1001": "1001@ecopuntos.com",
+        }
+        if clean_email in doc_map:
+            user = db.query(User).filter(User.email == doc_map[clean_email]).first()
+
+        if not user and clean_email.isdigit():
+            user = db.query(User).filter(User.id == int(clean_email)).first()
+
+        if not user and "@" not in clean_email:
+            user = db.query(User).filter(User.email.ilike(f"{clean_email}@ecopuntos.com")).first()
 
     if not user or not verify_password(login_in.password, user.password_hash):
         raise HTTPException(

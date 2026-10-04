@@ -205,7 +205,7 @@ const apiClient = {
           name: u.name,
           avatar: initials,
           city: u.default_city || 'Pamplona',
-          weightKg: 0,
+          weightKg: parseFloat(u.total_kg || u.weight_kg || (u.total_points ? (u.total_points / 40).toFixed(1) : 0)),
           points: u.total_points,
           level: u.level
         };

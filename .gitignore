@@ -21,6 +21,7 @@ frontend/.cache/
 
 # ── Python / FastAPI / pytest ─────────────────────────────────
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *.pyc
 *.pyo

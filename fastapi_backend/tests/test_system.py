@@ -26,6 +26,11 @@ def setup_db():
     db.close()
 
 def test_full_system_flow():
+    import uuid
+    uid = uuid.uuid4().hex[:8]
+    citizen_email = f"carlos_{uid}@eco.com"
+    gestor_email = f"pedro_{uid}@eco.com"
+
     # 1. Admin Login
     res = client.post("/api/auth/login", json={"email": "admin@ecopuntos.com", "password": "admin123"})
     assert res.status_code == 200
@@ -33,18 +38,18 @@ def test_full_system_flow():
     headers_admin = {"Authorization": f"Bearer {admin_token}"}
 
     # 2. Citizen Register
-    reg_res = client.post("/api/auth/register", json={"name": "Carlos Citizen", "email": "carlos_test@eco.com", "password": "pass1234", "default_city": "Pamplona"})
+    reg_res = client.post("/api/auth/register", json={"name": "Carlos Citizen", "email": citizen_email, "password": "pass1234", "default_city": "Pamplona"})
     assert reg_res.status_code == 201
     citizen_token = reg_res.json()["token"]
     citizen_id = reg_res.json()["user"]["id"]
     headers_citizen = {"Authorization": f"Bearer {citizen_token}"}
 
     # 3. Create Gestor by Admin
-    gestor_res = client.post("/api/admin/create-gestor", json={"name": "Pedro Gestor", "email": "pedro_gestor@eco.com", "password": "gestorpass123"}, headers=headers_admin)
+    gestor_res = client.post("/api/admin/create-gestor", json={"name": "Pedro Gestor", "email": gestor_email, "password": "gestorpass123"}, headers=headers_admin)
     assert gestor_res.status_code == 201 or gestor_res.status_code == 200
 
     # Gestor Login
-    g_login = client.post("/api/auth/login", json={"email": "pedro_gestor@eco.com", "password": "gestorpass123"})
+    g_login = client.post("/api/auth/login", json={"email": gestor_email, "password": "gestorpass123"})
     assert g_login.status_code == 200
     gestor_token = g_login.json()["token"]
     headers_gestor = {"Authorization": f"Bearer {gestor_token}"}
@@ -63,7 +68,12 @@ def test_full_system_flow():
     assert eps_res.status_code == 200
     ep_id = eps_res.json()["ecopoints"][0]["id"]
 
-    deliv_res = client.post("/api/deliveries", json={"ecopoint_id": ep_id, "items": [{"material_id": 1, "weight_kg": 20}]}, headers=headers_citizen)
+    mats_res = client.get("/api/materials")
+    assert mats_res.status_code == 200
+    mats_json = mats_res.json()
+    mat_id = mats_json[0]["id"] if isinstance(mats_json, list) else mats_json["materials"][0]["id"]
+
+    deliv_res = client.post("/api/deliveries", json={"ecopoint_id": ep_id, "items": [{"material_id": mat_id, "weight_kg": 20}]}, headers=headers_citizen)
     assert deliv_res.status_code == 201 or deliv_res.status_code == 200
     deliv_id = deliv_res.json()["delivery"]["id"]
 
@@ -79,7 +89,11 @@ def test_full_system_flow():
     # 7. Rewards & Redemption
     rw_res = client.get("/api/rewards")
     assert rw_res.status_code == 200
-    rw_id = rw_res.json()["rewards"][0]["id"]
+    rewards_list = rw_res.json()["rewards"]
+    current_pts = prof_res.json()["total_points"]
+    affordable = [r for r in rewards_list if r["point_cost"] <= current_pts]
+    assert len(affordable) > 0, f"No affordable reward found for {current_pts} points"
+    rw_id = affordable[0]["id"]
 
     red_res = client.post(f"/api/rewards/{rw_id}/redeem", headers=headers_citizen)
     assert red_res.status_code == 200

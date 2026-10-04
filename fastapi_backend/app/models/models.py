@@ -26,7 +26,7 @@ class User(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(150), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
-    role = Column(Enum(UserRole, native_enum=False), default=UserRole.Ciudadano, nullable=False)
+    role = Column(Enum(UserRole, name="user_role"), default=UserRole.Ciudadano, nullable=False)
     default_city = Column(String(100), default="Pamplona")
     total_points = Column(Integer, default=0, nullable=False)
     level = Column(String(50), default="Semilla Verde", nullable=False)
@@ -64,7 +64,7 @@ class Delivery(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     ecopoint_id = Column(Integer, ForeignKey("ecopoints.id", ondelete="CASCADE"), nullable=False)
-    status = Column(Enum(DeliveryStatus, native_enum=False), default=DeliveryStatus.pending, nullable=False)
+    status = Column(Enum(DeliveryStatus, name="delivery_status"), default=DeliveryStatus.pending, nullable=False)
     total_points = Column(Integer, default=0)
     total_co2 = Column(Numeric(10, 2), default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -121,7 +121,7 @@ class Campaign(Base):
     end_date = Column(DateTime, nullable=False)
     goal_points = Column(Integer, nullable=False)
     current_points = Column(Integer, default=0)
-    status = Column(Enum(CampaignStatus, native_enum=False), default=CampaignStatus.active, nullable=False)
+    status = Column(Enum(CampaignStatus, name="campaign_status"), default=CampaignStatus.active, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class CampaignParticipant(Base):
