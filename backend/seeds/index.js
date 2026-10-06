@@ -128,5 +128,12 @@ async function runSeeds() {
   }
 }
 
+if (require.main === module) {
+  runSeeds();
+}
+
+module.exports = { runSeeds };
+
+
 
 

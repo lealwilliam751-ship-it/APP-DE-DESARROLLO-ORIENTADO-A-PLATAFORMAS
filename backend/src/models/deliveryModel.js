@@ -45,7 +45,12 @@ const deliveryModel = {
         const co2PerKg = parseFloat(material.co2_kg_per_kg);
         const weightKg = parseFloat(item.weight_kg);
 
+        if (isNaN(weightKg) || weightKg <= 0) {
+          throw new Error('El peso en kg debe ser un número mayor a 0');
+        }
+
         const points = Math.floor(pointsPerKg * weightKg);
+
         const co2Saved = co2PerKg * weightKg;
         
         totalPoints += points;

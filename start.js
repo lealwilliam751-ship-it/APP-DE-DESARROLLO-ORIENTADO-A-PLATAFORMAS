@@ -53,11 +53,12 @@ async function init() {
     
     const filePath = path.join(ROOT_DIR, reqPath);
     
-    if (!filePath.startsWith(ROOT_DIR)) {
-      res.writeHead(403);
+    if (!filePath.startsWith(ROOT_DIR) || reqPath.includes('.env') || reqPath.includes('.git') || reqPath.includes('node_modules')) {
+      res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
       res.end('Acceso denegado');
       return;
     }
+
 
     fs.stat(filePath, (err, stats) => {
       if (err || !stats.isFile()) {

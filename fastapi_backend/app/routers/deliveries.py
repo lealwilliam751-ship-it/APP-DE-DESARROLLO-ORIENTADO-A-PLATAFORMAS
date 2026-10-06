@@ -35,7 +35,12 @@ def get_pending_deliveries(
     gestor: User = Depends(require_roles([UserRole.Gestor_de_Punto, UserRole.Administrador]))
 ):
     deliveries = db.query(Delivery).filter(Delivery.status == DeliveryStatus.pending).order_by(Delivery.created_at.asc()).all()
-    out = [DeliveryOut.model_validate(d) for d in deliveries]
+    out = []
+    for d in deliveries:
+        d_out = DeliveryOut.model_validate(d)
+        if d.user:
+            d_out.citizen_name = d.user.name
+        out.append(d_out)
     return out
 
 @router.post("", status_code=status.HTTP_201_CREATED)
@@ -45,8 +50,17 @@ def create_delivery(
     db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
     ecopoint_id = data.get_ecopoint_id()
+    
+    # If a gestor or admin is creating the delivery on behalf of a citizen:
+    target_user_id = current_user.id
+    provided_citizen_id = data.get_citizen_id()
+    if provided_citizen_id and current_user.role in [UserRole.Gestor_de_Punto, UserRole.Administrador]:
+        citizen = db.query(User).filter(User.id == provided_citizen_id).first()
+        if citizen:
+            target_user_id = citizen.id
+
     delivery = Delivery(
-        user_id=current_user.id,
+        user_id=target_user_id,
         ecopoint_id=ecopoint_id,
         status=DeliveryStatus.pending,
         total_points=0,
@@ -85,9 +99,13 @@ def create_delivery(
     db.commit()
     db.refresh(delivery)
 
-    delivery_out = DeliveryOut.model_validate(delivery).model_dump()
+    d_out = DeliveryOut.model_validate(delivery)
+    if delivery.user:
+        d_out.citizen_name = delivery.user.name
+    delivery_out = d_out.model_dump()
     delivery_out["deliveryId"] = delivery.id
     return {"delivery": delivery_out}
+
 
 @router.patch("/{delivery_id}/approve")
 def approve_delivery(

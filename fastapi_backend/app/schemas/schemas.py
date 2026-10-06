@@ -85,10 +85,15 @@ class DeliveryItemOut(BaseModel):
 class DeliveryCreate(BaseModel):
     ecopoint_id: Optional[int] = None
     ecopointId: Optional[int] = None
+    citizen_id: Optional[int] = None
+    citizenId: Optional[int] = None
     items: List[DeliveryItemCreate] = Field(..., min_length=1)
 
     def get_ecopoint_id(self) -> int:
         return self.ecopoint_id if self.ecopoint_id is not None else (self.ecopointId or 1)
+
+    def get_citizen_id(self) -> Optional[int]:
+        return self.citizen_id if self.citizen_id is not None else self.citizenId
 
 class DeliveryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -100,7 +105,9 @@ class DeliveryOut(BaseModel):
     total_points: int
     total_co2: float
     created_at: datetime
+    citizen_name: Optional[str] = None
     items: Optional[List[DeliveryItemOut]] = []
+
 
 # Reward Schemas
 class RewardCreate(BaseModel):

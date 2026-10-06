@@ -66,9 +66,10 @@ const rewardModel = {
       // Notify the user
       await client.query(
         `INSERT INTO notifications (user_id, title, message)
-         VALUES ($1, ' Recompensa Canjeada', 'Canjeaste "${reward.name}" por ${reward.point_cost} puntos. Código: ${redemptionCode}')`,
-        [userId]
+         VALUES ($1, 'Recompensa Canjeada', $2)`,
+        [userId, `Canjeaste "${reward.name}" por ${reward.point_cost} puntos. Código: ${redemptionCode}`]
       );
+
 
       await client.query('COMMIT');
       return redeemedRes.rows[0];

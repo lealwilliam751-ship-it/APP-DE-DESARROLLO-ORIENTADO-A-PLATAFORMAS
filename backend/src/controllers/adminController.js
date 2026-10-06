@@ -37,10 +37,13 @@ const adminController = {
 
       const existingUser = await userModel.getUserByEmail(safeEmail);
       if (existingUser) {
-        // If user exists, elevate to Gestor_de_Punto
+        if (existingUser.role === 'Administrador') {
+          return res.status(400).json({ error: 'No se puede cambiar el rol de un Administrador a Gestor' });
+        }
         await query(`UPDATE users SET role = 'Gestor_de_Punto' WHERE id = $1`, [existingUser.id]);
         return res.status(200).json({ message: 'Usuario promovido a Gestor de Punto exitosamente' });
       }
+
 
       const bcrypt = require('bcrypt');
       const passwordHash = await bcrypt.hash(password, 10);
