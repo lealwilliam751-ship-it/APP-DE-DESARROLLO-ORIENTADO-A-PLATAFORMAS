@@ -14,11 +14,6 @@ class DeliveryStatus(str, enum.Enum):
     approved = "approved"
     rejected = "rejected"
 
-class CampaignStatus(str, enum.Enum):
-    active = "active"
-    completed = "completed"
-    cancelled = "cancelled"
-
 class User(Base):
     __tablename__ = "users"
 
@@ -35,7 +30,6 @@ class User(Base):
 
     deliveries = relationship("Delivery", back_populates="user", cascade="all, delete-orphan")
     redeemed_rewards = relationship("RedeemedReward", back_populates="user", cascade="all, delete-orphan")
-    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
 
 class Material(Base):
     __tablename__ = "materials"
@@ -110,37 +104,3 @@ class RedeemedReward(Base):
 
     user = relationship("User", back_populates="redeemed_rewards")
     reward = relationship("Reward")
-
-class Campaign(Base):
-    __tablename__ = "campaigns"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(150), nullable=False)
-    description = Column(Text)
-    start_date = Column(DateTime, nullable=False)
-    end_date = Column(DateTime, nullable=False)
-    goal_points = Column(Integer, nullable=False)
-    current_points = Column(Integer, default=0)
-    status = Column(Enum(CampaignStatus, name="campaign_status"), default=CampaignStatus.active, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-class CampaignParticipant(Base):
-    __tablename__ = "campaign_participants"
-
-    id = Column(Integer, primary_key=True, index=True)
-    campaign_id = Column(Integer, ForeignKey("campaigns.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    points_contributed = Column(Integer, default=0, nullable=False)
-    joined_at = Column(DateTime(timezone=True), server_default=func.now())
-
-class Notification(Base):
-    __tablename__ = "notifications"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    title = Column(String(150), nullable=False)
-    message = Column(Text, nullable=False)
-    is_read = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-    user = relationship("User", back_populates="notifications")

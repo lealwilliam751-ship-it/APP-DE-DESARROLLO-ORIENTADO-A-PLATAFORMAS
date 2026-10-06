@@ -80,35 +80,6 @@ erDiagram
         timestamp redeemed_at
     }
 
-    CAMPAIGNS {
-        int id PK
-        string name
-        string description
-        timestamp start_date
-        timestamp end_date
-        int goal_points
-        int current_points
-        campaign_status status
-        timestamp created_at
-    }
-
-    CAMPAIGN_PARTICIPANTS {
-        int id PK
-        int campaign_id FK
-        int user_id FK
-        int points_contributed
-        timestamp joined_at
-    }
-
-    NOTIFICATIONS {
-        int id PK
-        int user_id FK
-        string title
-        string message
-        boolean is_read
-        timestamp created_at
-    }
-
     %% Relaciones
     USERS ||--o{ DELIVERIES : "realiza (1..N)"
     ECOPOINTS ||--o{ DELIVERIES : "recibe en (1..N)"
@@ -116,9 +87,6 @@ erDiagram
     MATERIALS ||--o{ DELIVERY_ITEMS : "clasifica (1..N)"
     USERS ||--o{ REDEEMED_REWARDS : "solicita canje (1..N)"
     REWARDS ||--o{ REDEEMED_REWARDS : "es canjeado en (1..N)"
-    CAMPAIGNS ||--o{ CAMPAIGN_PARTICIPANTS : "agrupa (1..N)"
-    USERS ||--o{ CAMPAIGN_PARTICIPANTS : "se inscribe en (1..N)"
-    USERS ||--o{ NOTIFICATIONS : "recibe (1..N)"
 ```
 
 ---
@@ -149,8 +117,8 @@ A continuación se demuestra la aplicación de las tres primeras formas normales
 
 ## 3. Justificación de Entidades Intermedias y Desnormalización Controlada
 
-### 3.1. Justificación de `campaign_participants` (Relación N..N)
-Entre `users` y `campaigns` existe una relación de **Muchos a Muchos (N..N)**: un usuario puede participar en múltiples campañas ecológicas, y una campaña agrupa a múltiples usuarios participantes. Para modelar esta relación sin romper la 1FN se implementó la tabla asociativa `campaign_participants` con una restricción de clave única compuesta `UNIQUE(campaign_id, user_id)`. Adicionalmente, esta tabla almacena el atributo derivado `points_contributed` para registrar el aporte específico de cada participante dentro de esa campaña.
+### 3.1. Simplificación del Modelo de Dominio
+En alineación con los requerimientos esenciales de la plataforma EcoPuntos Pamplona, las entidades de campañas y notificaciones fueron depuradas del modelo activo para mantener el foco en la gestión eficiente de entregas, reciclaje por materiales, cálculo de CO₂ ahorrado, redención de recompensas y acreditación de niveles para los ciudadanos.
 
 ### 3.2. Decisión de Desnormalización Controlada por Rendimiento
 Las columnas `total_points` y `total_co2` en la tabla `deliveries`, así como `total_points` en la tabla `users`, almacenan valores calculados. 

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 from typing import List, Optional
 from datetime import datetime
-from app.models.models import UserRole, DeliveryStatus, CampaignStatus
+from app.models.models import UserRole, DeliveryStatus
 
 # Token Schemas
 class Token(BaseModel):

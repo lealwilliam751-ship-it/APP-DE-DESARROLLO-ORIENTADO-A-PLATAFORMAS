@@ -1,25 +1,26 @@
 {
   "name": "ecopuntos-pamplona",
-  "version": "1.0.0",
-  "description": "Sistema de Incentivos de Reciclaje EcoPuntos Pamplona",
+  "version": "2.0.0",
+  "description": "Sistema de Incentivos de Reciclaje EcoPuntos Pamplona (Angular 17+ & FastAPI)",
   "main": "start.js",
   "scripts": {
     "start": "node start.js",
     "dev": "node start.js",
     "db:up": "docker-compose up -d",
     "db:down": "docker-compose down",
-    "migrate": "npm --prefix backend run migrate:up",
-    "seed": "npm --prefix backend run seed",
-    "setup": "docker-compose up -d && npm --prefix backend run migrate:up && npm --prefix backend run seed"
+    "seed": "cd fastapi_backend && python seed_completo.py",
+    "test:backend": "cd fastapi_backend && pytest tests/ -v",
+    "test:frontend": "cd frontend && ng test",
+    "setup": "docker-compose up -d && cd fastapi_backend && python seed_completo.py"
   },
   "keywords": [
     "ecopuntos",
     "pamplona",
     "reciclaje",
-    "express",
+    "fastapi",
+    "angular",
     "postgresql",
-    "postgis",
-    "pwa"
+    "postgis"
   ],
   "author": "Equipo EcoPuntos Pamplona",
   "license": "ISC"

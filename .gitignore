@@ -63,6 +63,7 @@ Desktop.ini
 *~
 
 # ── Logs & Temporales ─────────────────────────────────────────
+*.db
 *.log
 npm-debug.log*
 yarn-debug.log*

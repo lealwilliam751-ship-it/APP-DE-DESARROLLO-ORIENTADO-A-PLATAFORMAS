@@ -1,12 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EcoPointService } from '../../../app/core/services/ecopoint.service';
-import { EcoPoint } from '../../../app/core/models/ecopoint.model';
+import { RouterLink } from '@angular/router';
+import { EcoPointService } from '../../core/services/ecopoint.service';
+import { EcoPoint } from '../../core/models/ecopoint.model';
 
 @Component({
   selector: 'app-ecopoints',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="ecopoints-container">
       <div class="header">
@@ -23,6 +24,7 @@ import { EcoPoint } from '../../../app/core/models/ecopoint.model';
           <div class="ep-coords">
             <span>Lat: {{ ep.lat }}</span> | <span>Lng: {{ ep.lng }}</span>
           </div>
+          <a [routerLink]="['/ecopoints', ep.id]" class="btn-detail">Ver Detalle y Mapa →</a>
         </div>
       </div>
     </div>
@@ -47,12 +49,28 @@ import { EcoPoint } from '../../../app/core/models/ecopoint.model';
       border-radius: 12px;
       border: 1px solid #e2e8f0;
       box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
     }
     .ep-icon { font-size: 2rem; margin-bottom: 8px; }
     .ep-card h3 { color: #1b4332; margin: 0 0 8px 0; }
     .ep-address { color: #334155; margin: 4px 0; font-weight: 500; }
     .ep-city { color: #64748b; margin: 4px 0; font-size: 0.9rem; }
-    .ep-coords { font-size: 0.8rem; color: #94a3b8; margin-top: 12px; }
+    .ep-coords { font-size: 0.8rem; color: #94a3b8; margin-top: 12px; margin-bottom: 12px; }
+    .btn-detail {
+      margin-top: auto;
+      display: inline-block;
+      text-align: center;
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .btn-detail:hover { background: #c8e6c9; }
   `]
 })
 export class EcopointsComponent implements OnInit {

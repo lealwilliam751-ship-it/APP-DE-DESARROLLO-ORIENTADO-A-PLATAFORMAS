@@ -16,16 +16,39 @@ import { AuthService } from '../../../core/services/auth.service';
       </div>
 
       <div class="navbar-menu" *ngIf="authService.isLoggedIn(); else publicNav">
+        <!-- Links según el Rol -->
         <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">🏠 Inicio</a>
-        <a routerLink="/ecopoints" routerLinkActive="active" class="nav-item">📍 Ecopuntos</a>
-        <a routerLink="/deliveries" routerLinkActive="active" class="nav-item">📦 Entregas</a>
-        <a routerLink="/rewards" routerLinkActive="active" class="nav-item">🎁 Premios</a>
-        <a routerLink="/ranking" routerLinkActive="active" class="nav-item">🏆 Ranking</a>
+
+        <!-- Links para Ciudadano -->
+        <ng-container *ngIf="isCiudadano()">
+          <a routerLink="/ecopoints" routerLinkActive="active" class="nav-item">📍 Ecopuntos</a>
+          <a routerLink="/deliveries" routerLinkActive="active" class="nav-item">📦 Entregas</a>
+          <a routerLink="/rewards" routerLinkActive="active" class="nav-item">🎁 Premios</a>
+          <a routerLink="/ranking" routerLinkActive="active" class="nav-item">🏆 Ranking</a>
+          <a routerLink="/ciudadano/qr" routerLinkActive="active" class="nav-item highlight-btn">🪪 Mi QR</a>
+        </ng-container>
+
+        <!-- Links para Gestor de Punto -->
+        <ng-container *ngIf="isGestor()">
+          <a routerLink="/gestor/scan" routerLinkActive="active" class="nav-item highlight-btn">📱 Escanear QR</a>
+          <a routerLink="/deliveries" routerLinkActive="active" class="nav-item">📦 Gestionar Entregas</a>
+          <a routerLink="/ecopoints" routerLinkActive="active" class="nav-item">📍 Ecopuntos</a>
+        </ng-container>
+
+        <!-- Links para Administrador -->
+        <ng-container *ngIf="isAdmin()">
+          <a routerLink="/admin/metrics" routerLinkActive="active" class="nav-item">📊 Métricas</a>
+          <a routerLink="/admin/ecopoints" routerLinkActive="active" class="nav-item">📍 EcoPuntos</a>
+          <a routerLink="/admin/materials" routerLinkActive="active" class="nav-item">♻️ Materiales</a>
+          <a routerLink="/admin/rewards" routerLinkActive="active" class="nav-item">🎁 Recompensas</a>
+          <a routerLink="/admin/gestores" routerLinkActive="active" class="nav-item">👨‍🏭 Crear Gestor</a>
+          <a routerLink="/ranking" routerLinkActive="active" class="nav-item">🏆 Ranking</a>
+        </ng-container>
 
         <div class="user-badge" *ngIf="authService.currentUser() as user">
           <span class="user-name">{{ user.name }}</span>
-          <span class="user-role">{{ user.role }}</span>
-          <span class="user-points">⭐ {{ user.total_points }} pts</span>
+          <span class="user-role">{{ formatRole(user.role) }}</span>
+          <span class="user-points" *ngIf="isCiudadano()">⭐ {{ user.total_points }} pts</span>
           <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
         </div>
       </div>
@@ -72,14 +95,16 @@ import { AuthService } from '../../../core/services/auth.service';
     .navbar-menu {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
     .nav-item {
       color: #d8f3dc;
       text-decoration: none;
       font-weight: 500;
-      padding: 6px 12px;
+      font-size: 0.9rem;
+      padding: 6px 10px;
       border-radius: 6px;
       transition: all 0.2s ease;
     }
@@ -89,11 +114,17 @@ import { AuthService } from '../../../core/services/auth.service';
       color: #ffffff;
     }
 
+    .nav-item.highlight-btn {
+      background: #52b788;
+      color: #1b4332;
+      font-weight: 700;
+    }
+
     .user-badge {
       display: flex;
       align-items: center;
       gap: 10px;
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: rgba(0, 0, 0, 0.25);
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 0.85rem;
@@ -157,6 +188,25 @@ import { AuthService } from '../../../core/services/auth.service';
 export class NavbarComponent {
   authService = inject(AuthService);
   private router = inject(Router);
+
+  isCiudadano(): boolean {
+    const role = this.authService.currentUser()?.role;
+    return !role || role === 'Ciudadano';
+  }
+
+  isGestor(): boolean {
+    return this.authService.currentUser()?.role === 'Gestor_de_Punto';
+  }
+
+  isAdmin(): boolean {
+    return this.authService.currentUser()?.role === 'Administrador';
+  }
+
+  formatRole(role: string): string {
+    if (role === 'Gestor_de_Punto') return 'Gestor';
+    if (role === 'Administrador') return 'Admin';
+    return role;
+  }
 
   logout(): void {
     this.authService.logout();

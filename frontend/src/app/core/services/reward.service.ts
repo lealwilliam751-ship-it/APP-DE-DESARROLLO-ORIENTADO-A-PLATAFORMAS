@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Reward, RedeemedReward } from '../models/reward.model';
 
@@ -13,15 +14,21 @@ export class RewardService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Reward[]> {
-    return this.http.get<Reward[]>(this.apiUrl);
+    return this.http.get<any>(this.apiUrl).pipe(
+      map(res => Array.isArray(res) ? res : (res.rewards || []))
+    );
   }
 
   redeem(rewardId: number): Observable<RedeemedReward> {
-    return this.http.post<RedeemedReward>(`${this.apiUrl}/${rewardId}/redeem`, {});
+    return this.http.post<any>(`${this.apiUrl}/${rewardId}/redeem`, {}).pipe(
+      map(res => res.redemption || res)
+    );
   }
 
   getMyRedeemedHistory(): Observable<RedeemedReward[]> {
-    return this.http.get<RedeemedReward[]>(`${this.apiUrl}/history`);
+    return this.http.get<any>(`${this.apiUrl}/history`).pipe(
+      map(res => Array.isArray(res) ? res : (res.history || []))
+    );
   }
 
   create(data: Omit<Reward, 'id'>): Observable<Reward> {
