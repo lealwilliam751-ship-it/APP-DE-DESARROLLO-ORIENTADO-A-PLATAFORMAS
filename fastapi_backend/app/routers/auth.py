@@ -9,13 +9,17 @@ router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user_in.email).first()
+    clean_email = user_in.email.strip().lower()
+    if "@" not in clean_email or "." not in clean_email or len(clean_email) < 5:
+        raise HTTPException(status_code=400, detail="Formato de correo electrónico no válido.")
+
+    existing_user = db.query(User).filter(User.email.ilike(clean_email)).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="El correo electrónico ya se encuentra registrado.")
 
     db_user = User(
         name=user_in.name,
-        email=user_in.email,
+        email=clean_email,
         password_hash=get_password_hash(user_in.password),
         role=UserRole.Ciudadano,
         default_city=user_in.default_city or "Pamplona",

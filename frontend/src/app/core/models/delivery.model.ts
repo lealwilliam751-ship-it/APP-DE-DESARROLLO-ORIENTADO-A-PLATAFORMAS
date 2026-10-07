@@ -14,6 +14,7 @@ export interface Delivery {
   id: number;
   user_id: number;
   user_name?: string;
+  citizen_name?: string;
   ecopoint_id: number;
   ecopoint_name?: string;
   status: DeliveryStatus;
@@ -26,6 +27,8 @@ export interface Delivery {
 
 export interface CreateDeliveryDTO {
   ecopoint_id: number;
+  citizen_id?: number;
+  auto_approve?: boolean;
   items: {
     material_id: number;
     weight_kg: number;

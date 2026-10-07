@@ -23,7 +23,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'deliveries', component: DeliveriesComponent, canActivate: [authGuard] },
   { path: 'ecopoints', component: EcopointsComponent },
-  { path: 'ecopoints/:id', component: EcopointDetailComponent, canActivate: [authGuard] },
+  { path: 'ecopoints/:id', component: EcopointDetailComponent },
   { path: 'rewards', component: RewardsComponent },
   { path: 'ranking', component: RankingComponent },
 
@@ -74,6 +74,6 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: '**', redirectTo: '/dashboard' }
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' }
 ];

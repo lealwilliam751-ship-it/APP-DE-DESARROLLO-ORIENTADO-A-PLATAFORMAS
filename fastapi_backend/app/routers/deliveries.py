@@ -59,10 +59,15 @@ def create_delivery(
         if citizen:
             target_user_id = citizen.id
 
+    # Determine initial status: if Gestor/Admin creates delivery in person, auto-approve immediately
+    initial_status = DeliveryStatus.pending
+    if current_user.role in [UserRole.Gestor_de_Punto, UserRole.Administrador] and (data.auto_approve is None or data.auto_approve is True):
+        initial_status = DeliveryStatus.approved
+
     delivery = Delivery(
         user_id=target_user_id,
         ecopoint_id=ecopoint_id,
-        status=DeliveryStatus.pending,
+        status=initial_status,
         total_points=0,
         total_co2=Decimal(0)
     )
@@ -95,6 +100,12 @@ def create_delivery(
 
     delivery.total_points = calc_points
     delivery.total_co2 = calc_co2
+
+    if initial_status == DeliveryStatus.approved:
+        target_user = db.query(User).filter(User.id == target_user_id).first()
+        if target_user:
+            target_user.total_points += calc_points
+            target_user.level = calculate_level(target_user.total_points)
 
     db.commit()
     db.refresh(delivery)

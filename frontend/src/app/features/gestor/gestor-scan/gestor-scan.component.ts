@@ -1,230 +1,353 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { QrService, QRScanResponse } from '../../../core/services/qr.service';
+import jsQR from 'jsqr';
 
 @Component({
   selector: 'app-gestor-scan',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="scan-container">
-      <div class="scan-card">
-        <div class="card-header">
-          <h2>📱 Escanear Código QR de Ciudadano</h2>
-          <p>Valida la identidad del ciudadano en el Ecopunto para acreditar su entrega de residuos.</p>
+    <div class="page-container fade-in">
+      <div class="card scan-card">
+        <div class="fc-header">
+          <h2>📱 Validar Carnet Digital (Código QR)</h2>
+          <p>Escanea o sube una imagen de código QR para verificar al ciudadano y registrar su entrega</p>
         </div>
 
         <div class="card-body">
-          <div class="qr-camera-mock">
-            <div class="scanner-frame">
-              <div class="corner top-left"></div>
-              <div class="corner top-right"></div>
-              <div class="corner bottom-left"></div>
-              <div class="corner bottom-right"></div>
-              <div class="scan-line"></div>
-              <span class="cam-icon">📷</span>
-            </div>
-            <p class="scan-hint">Posiciona el código QR del ciudadano frente al visor o ingresa el código manual abajo.</p>
+
+          <!-- Option selector tabs -->
+          <div class="scan-tabs">
+            <button
+              class="scan-tab-btn"
+              [class.active]="scanMode() === 'image'"
+              (click)="setScanMode('image')"
+            >
+              🖼️ Subir Imagen de QR
+            </button>
+            <button
+              class="scan-tab-btn"
+              [class.active]="scanMode() === 'manual'"
+              (click)="setScanMode('manual')"
+            >
+              ⌨️ Código Manual / JSON
+            </button>
           </div>
 
-          <div class="manual-input-box">
-            <label for="qrPayload">Payload / Código QR:</label>
+          <!-- Mode 1: Image File Upload -->
+          <div class="upload-section" *ngIf="scanMode() === 'image'">
+            <div
+              class="drop-zone"
+              [class.has-image]="selectedImagePreview()"
+              (click)="fileInput.click()"
+              (dragover)="onDragOver($event)"
+              (drop)="onDrop($event)"
+            >
+              <input
+                #fileInput
+                type="file"
+                accept="image/*"
+                style="display: none;"
+                (change)="onFileSelected($event)"
+              />
+
+              <div *ngIf="!selectedImagePreview()" class="dz-prompt">
+                <div class="dz-icon">📷</div>
+                <strong>Haz clic aquí o arrastra la imagen del código QR</strong>
+                <p>Soporta capturas de pantalla, fotos JPG, PNG o WEBP</p>
+              </div>
+
+              <div *ngIf="selectedImagePreview()" class="dz-preview">
+                <img [src]="selectedImagePreview()" alt="QR cargado" class="preview-img" />
+                <div class="dz-preview-info">
+                  <span>{{ selectedFileName() }}</span>
+                  <button type="button" class="btn btn-sm btn-secondary" (click)="clearImage($event)">
+                    🔄 Cambiar Imagen
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mode 2: Manual Text / JSON Input -->
+          <div class="manual-input-box" *ngIf="scanMode() === 'manual'">
+            <label class="form-label" for="qrPayload">Payload / Código JSON del QR:</label>
             <div class="input-row">
               <input
                 id="qrPayload"
                 type="text"
                 [(ngModel)]="qrPayload"
-                placeholder='Ej. {"id":3,"name":"Ana Lucia Perez","email":"ana@ecopuntos.com"}'
+                placeholder='Ej. {"id":1,"name":"Juan Rodriguez","email":"1001@ecopuntos.com"}'
+                class="form-control"
               />
-              <button (click)="scanQR()" [disabled]="loading || !qrPayload" class="btn-scan">
-                {{ loading ? 'Validando...' : 'Escanear / Validar' }}
+              <button (click)="scanQR()" [disabled]="loading() || !qrPayload" class="btn btn-primary">
+                {{ loading() ? 'Validando...' : 'Validar Código' }}
               </button>
             </div>
           </div>
 
-          <div *ngIf="errorMessage" class="alert error">
-            ⚠️ {{ errorMessage }}
+          <!-- Error Alert -->
+          <div *ngIf="errorMessage()" class="alert alert-error mt-4">
+            ⚠️ {{ errorMessage() }}
           </div>
 
-          <!-- Resultado del escaneo -->
-          <div *ngIf="scanResult && scanResult.valid" class="citizen-result-card">
+          <!-- Scan Result Card -->
+          <div *ngIf="scanResult() as res" class="citizen-result-card fade-in">
             <div class="result-header">
-              <span class="badge-valid">✅ Ciudadano Validado</span>
+              <span class="pill pill-green">✅ Ciudadano Validado en Sistema</span>
             </div>
+
             <div class="citizen-details">
               <div class="detail-item">
-                <span class="label">Nombre:</span>
-                <span class="val">{{ scanResult.citizen.name }}</span>
+                <span class="label">Nombre completo:</span>
+                <span class="val">{{ res.citizen.name }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Correo:</span>
-                <span class="val">{{ scanResult.citizen.email }}</span>
+                <span class="label">Correo / Usuario:</span>
+                <span class="val">{{ res.citizen.email }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Nivel:</span>
-                <span class="val level-badge">{{ scanResult.citizen.level }}</span>
+                <span class="label">Nivel Ecológico:</span>
+                <span class="pill pill-blue">{{ res.citizen.level || 'Semilla Verde' }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Puntos Actuales:</span>
-                <span class="val points-val">⭐ {{ scanResult.citizen.total_points }} pts</span>
+                <span class="label">Puntos Acumulados:</span>
+                <span class="val points-val">⭐ {{ res.citizen.total_points | number }} pts</span>
               </div>
             </div>
 
-            <div class="action-box">
-              <button (click)="goToDeliveries(scanResult.citizen.id)" class="btn-delivery">
-                📦 Registrar Entrega para este Ciudadano
-              </button>
-            </div>
+            <button (click)="goToDeliveries(res.citizen.id)" class="btn btn-primary btn-full mt-3">
+              📦 Registrar Entrega para este Ciudadano →
+            </button>
           </div>
+
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .scan-container {
-      max-width: 650px;
-      margin: 30px auto;
-      padding: 0 20px;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    .scan-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    .card-header {
-      background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
-      color: white;
-      padding: 24px;
-    }
-    .card-header h2 { margin: 0 0 6px 0; font-size: 1.4rem; }
-    .card-header p { margin: 0; font-size: 0.88rem; opacity: 0.9; }
+    .scan-card { max-width: 620px; margin: 0 auto; padding: 0; overflow: hidden; }
+    .fc-header { background: linear-gradient(135deg, #1b4332, #2d6a4f); color: white; padding: 24px; }
+    .fc-header h2 { margin: 0 0 4px 0; color: white; font-size: 1.3rem; }
+    .fc-header p { margin: 0; color: white; opacity: 0.85; font-size: 0.9rem; }
     .card-body { padding: 24px; }
-    .qr-camera-mock {
-      background: #111;
-      border-radius: 12px;
-      padding: 30px;
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .scanner-frame {
-      width: 180px;
-      height: 180px;
-      margin: 0 auto 16px;
-      border: 2px dashed #52b788;
-      position: relative;
+
+    /* Tabs */
+    .scan-tabs {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      background: rgba(255,255,255,0.03);
-    }
-    .cam-icon { font-size: 3rem; }
-    .scan-line {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: #52b788;
-      box-shadow: 0 0 8px #52b788;
-      animation: scanAnim 2s infinite ease-in-out;
-    }
-    @keyframes scanAnim {
-      0% { top: 0%; }
-      50% { top: 95%; }
-      100% { top: 0%; }
-    }
-    .scan-hint { color: #aaa; font-size: 0.85rem; margin: 0; }
-    .manual-input-box { margin-bottom: 20px; }
-    .manual-input-box label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
-    .input-row { display: flex; gap: 10px; }
-    .input-row input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-family: monospace;
-      font-size: 0.85rem;
-    }
-    .btn-scan {
-      background-color: #2d6a4f;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-scan:disabled { opacity: 0.6; cursor: not-allowed; }
-    .alert.error {
-      background-color: #ffddd2;
-      color: #c1121f;
-      padding: 12px;
-      border-radius: 6px;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-    }
-    .citizen-result-card {
-      background: #f4fbf7;
-      border: 2px solid #52b788;
+      gap: 8px;
+      background: #f1f5f9;
+      padding: 4px;
       border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .scan-tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .scan-tab-btn.active {
+      background: white;
+      color: #1b4332;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed #b7e4c7;
+      background: #f0faf3;
+      border-radius: 14px;
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .drop-zone:hover {
+      border-color: #52b788;
+      background: #e8f5e9;
+    }
+    .drop-zone.has-image {
+      padding: 16px;
+      border-style: solid;
+      background: white;
+    }
+    .dz-icon { font-size: 3rem; margin-bottom: 8px; }
+    .dz-prompt strong { display: block; font-size: 1rem; color: #1b4332; margin-bottom: 4px; }
+    .dz-prompt p { font-size: 0.82rem; color: #64748b; margin: 0; }
+
+    .dz-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-img {
+      max-width: 180px;
+      max-height: 180px;
+      border-radius: 10px;
+      border: 2px solid #52b788;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      object-fit: contain;
+    }
+    .dz-preview-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    /* Manual box */
+    .manual-input-box { margin-bottom: 16px; }
+    .input-row { display: flex; gap: 10px; }
+    .input-row input { flex: 1; font-family: monospace; font-size: 0.85rem; }
+
+    /* Result Card */
+    .citizen-result-card {
+      background: #f0faf3;
+      border: 1px solid #b7e4c7;
+      border-radius: 12px;
       padding: 20px;
       margin-top: 20px;
     }
     .result-header { margin-bottom: 14px; }
-    .badge-valid {
-      background: #2d6a4f;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
-    .citizen-details { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-    .detail-item { display: flex; justify-content: space-between; font-size: 0.95rem; }
-    .detail-item .label { color: #555; font-weight: 500; }
+    .citizen-details { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+    .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 0.92rem; }
+    .detail-item .label { color: #64748b; font-weight: 500; }
     .detail-item .val { font-weight: 700; color: #1b4332; }
-    .level-badge { background: #d8f3dc; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; }
-    .points-val { color: #d97706; }
-    .btn-delivery {
-      width: 100%;
-      background: #1b4332;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
+    .points-val { color: #b45309; }
+    .btn-full { width: 100%; justify-content: center; padding: 12px; font-weight: 700; }
+    .mt-3 { margin-top: 14px; }
+    .mt-4 { margin-top: 16px; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+
+    @media (max-width: 520px) {
+      .input-row { flex-direction: column; }
     }
-    .btn-delivery:hover { background: #081c15; }
   `]
 })
 export class GestorScanComponent {
   private qrService = inject(QrService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
+  scanMode = signal<'image' | 'manual'>('image');
   qrPayload = '';
-  loading = false;
-  errorMessage = '';
-  scanResult: QRScanResponse | null = null;
+  selectedImagePreview = signal<string | null>(null);
+  selectedFileName = signal<string>('');
+  loading = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  scanResult = signal<QRScanResponse | null>(null);
+
+  setScanMode(mode: 'image' | 'manual'): void {
+    this.scanMode.set(mode);
+    this.errorMessage.set('');
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+      this.processFile(event.dataTransfer.files[0]);
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.processFile(input.files[0]);
+    }
+  }
+
+  clearImage(event: MouseEvent): void {
+    event.stopPropagation();
+    this.selectedImagePreview.set(null);
+    this.selectedFileName.set('');
+    this.scanResult.set(null);
+    this.errorMessage.set('');
+  }
+
+  private processFile(file: File): void {
+    if (!file.type.startsWith('image/')) {
+      this.errorMessage.set('Por favor selecciona un archivo de imagen válido (PNG, JPG, WEBP).');
+      return;
+    }
+
+    this.selectedFileName.set(file.name);
+    this.errorMessage.set('');
+    this.scanResult.set(null);
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const dataUrl = e.target.result;
+      this.selectedImagePreview.set(dataUrl);
+
+      // Extract QR from image pixels using jsQR and canvas
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        if (!context) {
+          this.errorMessage.set('No se pudo inicializar el procesador de imágenes.');
+          return;
+        }
+
+        context.drawImage(img, 0, 0, img.width, img.height);
+        const imageData = context.getImageData(0, 0, img.width, img.height);
+
+        // Decode with jsQR
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+        if (code && code.data) {
+          this.qrPayload = code.data;
+          this.scanQR();
+        } else {
+          this.errorMessage.set('No se detectó un código QR en la imagen. Asegúrate de que la imagen sea clara.');
+          this.cdr.detectChanges();
+        }
+      };
+      img.src = dataUrl;
+    };
+
+    reader.readAsDataURL(file);
+  }
 
   scanQR(): void {
     if (!this.qrPayload) return;
 
-    this.loading = true;
-    this.errorMessage = '';
-    this.scanResult = null;
+    this.loading.set(true);
+    this.errorMessage.set('');
+    this.scanResult.set(null);
 
     this.qrService.scan(this.qrPayload).subscribe({
       next: (res) => {
-        this.scanResult = res;
-        this.loading = false;
+        this.scanResult.set(res);
+        this.loading.set(false);
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorMessage = err.error?.detail || 'Código QR inválido o no reconocido.';
-        this.loading = false;
+        this.errorMessage.set(err.error?.detail || 'Código QR inválido o no reconocido.');
+        this.loading.set(false);
+        this.cdr.detectChanges();
       }
     });
   }

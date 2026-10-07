@@ -29,4 +29,8 @@ export class QrService {
   scan(payload: string): Observable<QRScanResponse> {
     return this.http.post<QRScanResponse>(`${this.apiUrl}/scan`, { payload });
   }
+
+  getCitizenById(citizenId: number): Observable<QRScanResponse> {
+    return this.http.get<QRScanResponse>(`${this.apiUrl}/citizen/${citizenId}`);
+  }
 }

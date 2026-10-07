@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { EcoPointService } from '../../core/services/ecopoint.service';
@@ -9,78 +9,132 @@ import { EcoPoint } from '../../core/models/ecopoint.model';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="ecopoints-container">
-      <div class="header">
-        <h2>📍 Ecopuntos en Pamplona</h2>
-        <p>Encuentra el punto de acopio y reciclaje más cercano a tu ubicación</p>
+    <div class="page-container fade-in">
+      <div class="page-header">
+        <div>
+          <h2>📍 Puntos de Reciclaje (EcoPuntos)</h2>
+          <p style="color: #64748b; font-size: 0.95rem;">Encuentra el punto de acopio y reciclaje más cercano en Pamplona</p>
+        </div>
       </div>
 
-      <div class="ecopoints-grid">
-        <div *ngFor="let ep of ecopoints" class="ep-card">
-          <div class="ep-icon">♻️</div>
-          <h3>{{ ep.name }}</h3>
-          <p class="ep-address">📍 {{ ep.address }}</p>
-          <p class="ep-city">🏙️ {{ ep.city }}</p>
-          <div class="ep-coords">
-            <span>Lat: {{ ep.lat }}</span> | <span>Lng: {{ ep.lng }}</span>
+      <!-- Loading Spinner -->
+      <div class="spinner" *ngIf="loading()"></div>
+
+      <!-- Error alert -->
+      <div class="alert alert-error" *ngIf="errorMessage()">
+        ⚠️ {{ errorMessage() }}
+      </div>
+
+      <!-- Empty state -->
+      <div class="card empty-state" *ngIf="!loading() && ecopoints().length === 0 && !errorMessage()">
+        <div class="empty-icon">📍</div>
+        <p>No se encontraron EcoPuntos registrados en Pamplona.</p>
+      </div>
+
+      <!-- EcoPoints Grid -->
+      <div class="grid-3" *ngIf="!loading() && ecopoints().length > 0">
+        <div *ngFor="let ep of ecopoints()" class="ep-card card">
+          <div class="ep-header">
+            <div class="ep-badge-icon">♻️</div>
+            <span class="ep-city-tag">{{ ep.city }}</span>
           </div>
-          <a [routerLink]="['/ecopoints', ep.id]" class="btn-detail">Ver Detalle y Mapa →</a>
+
+          <h3 class="ep-title">{{ ep.name }}</h3>
+          <p class="ep-address">📍 {{ ep.address }}</p>
+
+          <div class="ep-coords">
+            <span>🌐 Lat: <strong>{{ ep.lat }}</strong></span>
+            <span>Lng: <strong>{{ ep.lng }}</strong></span>
+          </div>
+
+          <a [routerLink]="['/ecopoints', ep.id]" class="btn btn-primary btn-full mt-auto">
+            Ver Detalle y Mapa →
+          </a>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .ecopoints-container {
-      max-width: 1080px;
-      margin: 24px auto;
-      padding: 0 20px;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    .header h2 { color: #1b4332; margin-top: 0; }
-    .header p { color: #64748b; margin-bottom: 24px; }
-    .ecopoints-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
     .ep-card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
       display: flex;
       flex-direction: column;
+      height: 100%;
+      gap: 12px;
     }
-    .ep-icon { font-size: 2rem; margin-bottom: 8px; }
-    .ep-card h3 { color: #1b4332; margin: 0 0 8px 0; }
-    .ep-address { color: #334155; margin: 4px 0; font-weight: 500; }
-    .ep-city { color: #64748b; margin: 4px 0; font-size: 0.9rem; }
-    .ep-coords { font-size: 0.8rem; color: #94a3b8; margin-top: 12px; margin-bottom: 12px; }
-    .btn-detail {
-      margin-top: auto;
-      display: inline-block;
-      text-align: center;
-      background: #e8f5e9;
-      color: #2e7d32;
-      padding: 8px 12px;
-      border-radius: 6px;
+    .ep-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ep-badge-icon {
+      font-size: 1.8rem;
+      background: #f0faf3;
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid #b7e4c7;
+    }
+    .ep-city-tag {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 0.72rem;
       font-weight: 700;
-      text-decoration: none;
-      font-size: 0.85rem;
-      transition: background 0.2s;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
-    .btn-detail:hover { background: #c8e6c9; }
+    .ep-title {
+      font-size: 1.15rem;
+      color: #1b4332;
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 0;
+    }
+    .ep-address {
+      color: #475569;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin: 0;
+    }
+    .ep-coords {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      background: #f8fafc;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: flex;
+      gap: 12px;
+    }
+    .btn-full { width: 100%; justify-content: center; }
+    .mt-auto { margin-top: auto; }
   `]
 })
 export class EcopointsComponent implements OnInit {
   private ecopointService = inject(EcoPointService);
-  ecopoints: EcoPoint[] = [];
+  private cdr = inject(ChangeDetectorRef);
+
+  ecopoints = signal<EcoPoint[]>([]);
+  loading = signal<boolean>(true);
+  errorMessage = signal<string>('');
 
   ngOnInit(): void {
+    this.loadEcoPoints();
+  }
+
+  loadEcoPoints(): void {
+    this.loading.set(true);
     this.ecopointService.getAll().subscribe({
-      next: (res) => this.ecopoints = res,
-      error: () => this.ecopoints = []
+      next: (res) => {
+        this.ecopoints.set(res || []);
+        this.loading.set(false);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.error?.detail || 'No se pudieron cargar los EcoPuntos.');
+        this.loading.set(false);
+        this.cdr.detectChanges();
+      }
     });
   }
 }

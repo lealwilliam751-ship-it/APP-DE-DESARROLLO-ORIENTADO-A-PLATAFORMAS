@@ -48,3 +48,19 @@ def scan_qr(
         "valid": True,
         "citizen": UserOut.model_validate(citizen)
     }
+
+@router.get("/citizen/{citizen_id}")
+def get_citizen_by_id(
+    citizen_id: int,
+    db: Session = Depends(get_db),
+    gestor: User = Depends(require_roles([UserRole.Gestor_de_Punto, UserRole.Administrador]))
+) -> Dict[str, Any]:
+    citizen = db.query(User).filter(User.id == citizen_id).first()
+    if not citizen:
+        raise HTTPException(status_code=404, detail="Ciudadano no encontrado.")
+
+    return {
+        "valid": True,
+        "citizen": UserOut.model_validate(citizen)
+    }
+

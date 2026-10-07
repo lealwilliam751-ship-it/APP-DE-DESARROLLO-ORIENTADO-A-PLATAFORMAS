@@ -87,6 +87,7 @@ class DeliveryCreate(BaseModel):
     ecopointId: Optional[int] = None
     citizen_id: Optional[int] = None
     citizenId: Optional[int] = None
+    auto_approve: Optional[bool] = True
     items: List[DeliveryItemCreate] = Field(..., min_length=1)
 
     def get_ecopoint_id(self) -> int:

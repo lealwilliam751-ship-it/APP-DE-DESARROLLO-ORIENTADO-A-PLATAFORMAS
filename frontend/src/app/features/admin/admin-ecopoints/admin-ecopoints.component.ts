@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { EcoPointService } from '../../../core/services/ecopoint.service';
@@ -9,88 +9,97 @@ import { EcoPoint } from '../../../core/models/ecopoint.model';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <div class="admin-ecopoints-container">
-      <div class="header">
-        <h1>📍 Administración de EcoPuntos</h1>
-        <button class="btn-create" (click)="openModal()">+ Nuevo EcoPunto</button>
+    <div class="page-container fade-in">
+      <div class="page-header">
+        <div>
+          <h2>📍 Gestión de EcoPuntos de Acopio</h2>
+          <p style="color: #64748b; font-size: 0.95rem;">Administra las ubicaciones físicas y coordenadas de los puntos de recolección en Pamplona</p>
+        </div>
+        <button class="btn btn-primary" (click)="openModal()">+ Nuevo EcoPunto</button>
       </div>
 
-      <div *ngIf="loading" class="spinner-box">Cargando EcoPuntos...</div>
-      <div *ngIf="alertMessage" class="alert" [ngClass]="alertType">{{ alertMessage }}</div>
+      <!-- Spinner -->
+      <div class="spinner" *ngIf="loading()"></div>
 
-      <div class="ecopoints-table-card" *ngIf="!loading">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Dirección</th>
-              <th>Ciudad</th>
-              <th>Coordenadas (Lat, Lng)</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let ep of ecopoints">
-              <td>#{{ ep.id }}</td>
-              <td><strong>{{ ep.name }}</strong></td>
-              <td>{{ ep.address }}</td>
-              <td><span class="city-tag">{{ ep.city }}</span></td>
-              <td>{{ ep.lat }}, {{ ep.lng }}</td>
-              <td class="actions">
-                <button class="btn-edit" (click)="openModal(ep)">✏️ Editar</button>
-                <button class="btn-delete" (click)="confirmDelete(ep)">🗑️ Eliminar</button>
-              </td>
-            </tr>
-            <tr *ngIf="ecopoints.length === 0">
-              <td colspan="6" class="empty-state">No hay EcoPuntos registrados.</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Alert -->
+      <div class="alert" [ngClass]="alertType() === 'success' ? 'alert-success' : 'alert-error'" *ngIf="alertMessage()">
+        {{ alertType() === 'success' ? '✅' : '⚠️' }} {{ alertMessage() }}
       </div>
 
-      <!-- Modal Formulario -->
-      <div class="modal-backdrop" *ngIf="showModal">
-        <div class="modal-card">
+      <!-- Table Card -->
+      <div class="card" *ngIf="!loading()">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 70px;">ID</th>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Ciudad</th>
+                <th>Coordenadas (Lat, Lng)</th>
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let ep of ecopoints()">
+                <td><span class="id-badge">#{{ ep.id }}</span></td>
+                <td><strong>{{ ep.name }}</strong></td>
+                <td>📍 {{ ep.address }}</td>
+                <td><span class="pill pill-green">{{ ep.city }}</span></td>
+                <td style="color: #64748b; font-size: 0.85rem">{{ ep.lat }}, {{ ep.lng }}</td>
+                <td style="text-align: right;">
+                  <div style="display: inline-flex; gap: 6px;">
+                    <button class="btn btn-sm btn-secondary" (click)="openModal(ep)">✏️ Editar</button>
+                    <button class="btn btn-sm btn-danger" (click)="confirmDelete(ep)">🗑️ Eliminar</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="ecopoints().length === 0">
+                <td colspan="6" style="text-align: center; color: #64748b; padding: 32px;">No hay EcoPuntos registrados en el sistema.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modal Form -->
+      <div class="modal-backdrop" *ngIf="showModal()">
+        <div class="modal-card card">
           <div class="modal-header">
-            <h3>{{ isEditing ? 'Editar EcoPunto' : 'Crear Nuevo EcoPunto' }}</h3>
+            <h3>{{ isEditing() ? '✏️ Editar EcoPunto' : '✨ Crear Nuevo EcoPunto' }}</h3>
             <button class="close-btn" (click)="closeModal()">✕</button>
           </div>
 
           <form [formGroup]="ecopointForm" (ngSubmit)="saveEcoPoint()" class="modal-body">
             <div class="form-group">
-              <label>Nombre del EcoPunto *</label>
-              <input type="text" formControlName="name" placeholder="Ej. EcoPunto Universidad" />
-              <span *ngIf="isFieldInvalid('name')" class="field-error">El nombre es obligatorio.</span>
+              <label class="form-label">Nombre del EcoPunto *</label>
+              <input type="text" formControlName="name" placeholder="Ej. EcoPunto Parque Águeda" class="form-control" />
             </div>
 
             <div class="form-group">
-              <label>Dirección *</label>
-              <input type="text" formControlName="address" placeholder="Ej. Carrera 4 # 7-12" />
-              <span *ngIf="isFieldInvalid('address')" class="field-error">La dirección es obligatoria.</span>
+              <label class="form-label">Dirección *</label>
+              <input type="text" formControlName="address" placeholder="Ej. Carrera 4 # 7-12" class="form-control" />
             </div>
 
-            <div class="form-row">
-              <div class="form-group col">
-                <label>Ciudad</label>
-                <input type="text" formControlName="city" placeholder="Pamplona" />
+            <div class="grid-3">
+              <div class="form-group">
+                <label class="form-label">Ciudad</label>
+                <input type="text" formControlName="city" placeholder="Pamplona" class="form-control" />
               </div>
-              <div class="form-group col">
-                <label>Latitud *</label>
-                <input type="number" step="0.0001" formControlName="lat" placeholder="7.3762" />
-                <span *ngIf="isFieldInvalid('lat')" class="field-error">Latitud requerida.</span>
+              <div class="form-group">
+                <label class="form-label">Latitud *</label>
+                <input type="number" step="0.0001" formControlName="lat" placeholder="7.3762" class="form-control" />
               </div>
-              <div class="form-group col">
-                <label>Longitud *</label>
-                <input type="number" step="0.0001" formControlName="lng" placeholder="-72.6475" />
-                <span *ngIf="isFieldInvalid('lng')" class="field-error">Longitud requerida.</span>
+              <div class="form-group">
+                <label class="form-label">Longitud *</label>
+                <input type="number" step="0.0001" formControlName="lng" placeholder="-72.6475" class="form-control" />
               </div>
             </div>
 
-            <div class="modal-footer">
-              <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
-              <button type="submit" [disabled]="submitting" class="btn-save">
-                {{ submitting ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Guardar') }}
+            <div class="modal-footer mt-4">
+              <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+              <button type="submit" [disabled]="submitting()" class="btn btn-primary">
+                {{ submitting() ? 'Guardando...' : (isEditing() ? 'Actualizar EcoPunto' : 'Guardar EcoPunto') }}
               </button>
             </div>
           </form>
@@ -99,134 +108,36 @@ import { EcoPoint } from '../../../core/models/ecopoint.model';
     </div>
   `,
   styles: [`
-    .admin-ecopoints-container {
-      max-width: 1100px;
-      margin: 30px auto;
-      padding: 0 20px;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-    .header h1 {
-      color: #1b4332;
-      font-size: 1.8rem;
-      margin: 0;
-    }
-    .btn-create {
-      background-color: #2d6a4f;
-      color: white;
-      border: none;
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-create:hover { background-color: #1b4332; }
-    .ecopoints-table-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      overflow-x: auto;
-    }
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-    .data-table th, .data-table td {
-      padding: 14px 18px;
-      border-bottom: 1px solid #eee;
-    }
-    .data-table th {
-      background-color: #f8f9fa;
-      color: #2d6a4f;
-      font-weight: 600;
-    }
-    .city-tag {
-      background: #e8f5e9;
-      color: #2e7d32;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    .actions {
-      display: flex;
-      gap: 8px;
-    }
-    .btn-edit {
-      background: #e3f2fd;
-      color: #1565c0;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-delete {
-      background: #ffebee;
-      color: #c62828;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+    .id-badge { background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+    .btn-secondary:hover { background: #cbd5e1; }
+
     .modal-backdrop {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+      position: fixed; inset: 0; background: rgba(10,46,26,0.6);
+      backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 1100;
     }
-    .modal-card {
-      background: white;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 550px;
-      overflow: hidden;
-    }
-    .modal-header {
-      background: #2d6a4f;
-      color: white;
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .modal-header h3 { margin: 0; }
+    .modal-card { width: 100%; max-width: 540px; padding: 0; overflow: hidden; }
+    .modal-header { background: #1b4332; color: white; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { margin: 0; color: white; font-size: 1.15rem; }
     .close-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
-    .modal-body { padding: 20px; }
-    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; }
-    .form-row { display: flex; gap: 12px; }
-    .col { flex: 1; }
-    label { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #444; }
-    input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; }
-    .field-error { color: #d32f2f; font-size: 0.75rem; margin-top: 2px; }
-    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .btn-cancel { background: #eee; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-    .btn-save { background: #2d6a4f; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
-    .alert { padding: 12px; border-radius: 6px; margin-bottom: 16px; }
-    .alert.success { background: #d8f3dc; color: #1b4332; }
-    .alert.error { background: #ffddd2; color: #c1121f; }
+    .modal-body { padding: 24px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+    .mt-4 { margin-top: 20px; }
   `]
 })
 export class AdminEcopointsComponent implements OnInit {
   private ecopointService = inject(EcoPointService);
   private fb = inject(FormBuilder);
+  private cdr = inject(ChangeDetectorRef);
 
-  ecopoints: EcoPoint[] = [];
-  loading = true;
-  submitting = false;
-  showModal = false;
-  isEditing = false;
-  currentId: number | null = null;
-  alertMessage = '';
-  alertType = 'success';
+  ecopoints = signal<EcoPoint[]>([]);
+  loading = signal<boolean>(true);
+  submitting = signal<boolean>(false);
+  showModal = signal<boolean>(false);
+  isEditing = signal<boolean>(false);
+  currentId = signal<number | null>(null);
+  alertMessage = signal<string>('');
+  alertType = signal<'success' | 'error'>('success');
 
   ecopointForm: FormGroup = this.fb.group({
     name: ['', Validators.required],
@@ -241,39 +152,36 @@ export class AdminEcopointsComponent implements OnInit {
   }
 
   loadEcopoints(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.ecopointService.getAll().subscribe({
       next: (data) => {
-        this.ecopoints = data;
-        this.loading = false;
+        this.ecopoints.set(data || []);
+        this.loading.set(false);
+        this.cdr.detectChanges();
       },
       error: () => {
         this.showAlert('Error al cargar la lista de EcoPuntos.', 'error');
-        this.loading = false;
+        this.loading.set(false);
+        this.cdr.detectChanges();
       }
     });
   }
 
-  isFieldInvalid(field: string): boolean {
-    const control = this.ecopointForm.get(field);
-    return !!(control && control.invalid && (control.dirty || control.touched));
-  }
-
   openModal(ecopoint?: EcoPoint): void {
-    this.showModal = true;
+    this.showModal.set(true);
     if (ecopoint) {
-      this.isEditing = true;
-      this.currentId = ecopoint.id;
+      this.isEditing.set(true);
+      this.currentId.set(ecopoint.id);
       this.ecopointForm.patchValue(ecopoint);
     } else {
-      this.isEditing = false;
-      this.currentId = null;
+      this.isEditing.set(false);
+      this.currentId.set(null);
       this.ecopointForm.reset({ city: 'Pamplona', lat: 7.3758, lng: -72.6483 });
     }
   }
 
   closeModal(): void {
-    this.showModal = false;
+    this.showModal.set(false);
   }
 
   saveEcoPoint(): void {
@@ -282,33 +190,33 @@ export class AdminEcopointsComponent implements OnInit {
       return;
     }
 
-    this.submitting = true;
+    this.submitting.set(true);
     const formData = this.ecopointForm.value;
 
-    if (this.isEditing && this.currentId) {
-      this.ecopointService.update(this.currentId, formData).subscribe({
+    if (this.isEditing() && this.currentId()) {
+      this.ecopointService.update(this.currentId()!, formData).subscribe({
         next: () => {
           this.showAlert('EcoPunto actualizado con éxito.', 'success');
-          this.submitting = false;
+          this.submitting.set(false);
           this.closeModal();
           this.loadEcopoints();
         },
         error: (err) => {
           this.showAlert(err.error?.detail || 'Error al actualizar EcoPunto.', 'error');
-          this.submitting = false;
+          this.submitting.set(false);
         }
       });
     } else {
       this.ecopointService.create(formData).subscribe({
         next: () => {
           this.showAlert('EcoPunto creado con éxito.', 'success');
-          this.submitting = false;
+          this.submitting.set(false);
           this.closeModal();
           this.loadEcopoints();
         },
         error: (err) => {
           this.showAlert(err.error?.detail || 'Error al crear EcoPunto.', 'error');
-          this.submitting = false;
+          this.submitting.set(false);
         }
       });
     }
@@ -329,8 +237,9 @@ export class AdminEcopointsComponent implements OnInit {
   }
 
   showAlert(msg: string, type: 'success' | 'error'): void {
-    this.alertMessage = msg;
-    this.alertType = type;
-    setTimeout(() => { this.alertMessage = ''; }, 4000);
+    this.alertMessage.set(msg);
+    this.alertType.set(type);
+    this.cdr.detectChanges();
+    setTimeout(() => { this.alertMessage.set(''); this.cdr.detectChanges(); }, 4000);
   }
 }

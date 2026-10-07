@@ -61,18 +61,59 @@ def seed_database():
         mat_papel  = find_mat("carton", "papel")
         mat_metal  = find_mat("metal", "aluminio")
 
-        # ── 2. Ecopuntos ──────────────────────────────────────────────
-        if db.query(EcoPoint).count() == 0:
-            ecopoints = [
-                EcoPoint(name="Ecopunto Central Pamplona",    address="Calle 6 #4-20",         city="Pamplona", lat=7.3758,  lng=-72.6483),
-                EcoPoint(name="Ecopunto Plazuela Almeyda",    address="Carrera 4 #7-12",        city="Pamplona", lat=7.3762,  lng=-72.6475),
-                EcoPoint(name="Ecopunto Unipamplona Campus",  address="Km 1 Via Bucaramanga",   city="Pamplona", lat=7.3800,  lng=-72.6500),
-            ]
-            db.add_all(ecopoints)
-            db.flush()
-            print("  Ecopuntos cargados.")
-        else:
-            print("  Ecopuntos ya existentes, omitiendo.")
+        # ── 2. Ecopuntos Reales e Investigados de Pamplona, Norte de Santander ───
+        real_ecopoints_data = [
+            dict(name="Centro de Acopio Asociación Renacer", address="Carrera 6 #1-15, Sector Chapinero (Planta Km 3 Vía La Cortada)", city="Pamplona", lat=7.3785, lng=-72.6460),
+            dict(name="Punto Limpio Empopamplona S.A. E.S.P.", address="Carrera 6 N° 4-65, Barrio Centro", city="Pamplona", lat=7.3758, lng=-72.6483),
+            dict(name="Asociación Ecología y Paz",            address="Carrera 8 N° 2-10, Barrio Centro", city="Pamplona", lat=7.3770, lng=-72.6490),
+            dict(name="Ecopunto Unipamplona Campus Principal",address="Ciudad Universitaria, Km 1 Vía Bucaramanga", city="Pamplona", lat=7.3820, lng=-72.6515),
+            dict(name="Ecopunto Parque Águeda Gallardo",    address="Calle 6 con Carrera 5, Centro Histórico", city="Pamplona", lat=7.3765, lng=-72.6480),
+            dict(name="Ecopunto Plazuela Almeyda",          address="Carrera 4 con Calle 7, Barrio El Carmen", city="Pamplona", lat=7.3795, lng=-72.6455),
+        ]
+
+        # Deduplicar y sincronizar ecopuntos existentes
+        all_eps = db.query(EcoPoint).all()
+        ep_map = {}
+        for ep_item in list(all_eps):
+            clean_name = ep_item.name.strip().lower()
+            match = None
+            if "renacer" in clean_name or "chapinero" in clean_name:
+                match = real_ecopoints_data[0]["name"]
+            elif "empopamplona" in clean_name or "limpio" in clean_name:
+                match = real_ecopoints_data[1]["name"]
+            elif "ecología" in clean_name or "ecologia" in clean_name or "paz" in clean_name:
+                match = real_ecopoints_data[2]["name"]
+            elif "unipamplona" in clean_name or "universidad" in clean_name or "campus" in clean_name:
+                match = real_ecopoints_data[3]["name"]
+            elif "águeda" in clean_name or "agueda" in clean_name or "sucre" in clean_name or "parque" in clean_name or "central" in clean_name:
+                match = real_ecopoints_data[4]["name"]
+            elif "almeyda" in clean_name or "almeida" in clean_name:
+                match = real_ecopoints_data[5]["name"]
+            else:
+                match = real_ecopoints_data[4]["name"]
+
+            if match not in ep_map:
+                ep_map[match] = ep_item
+                for r in real_ecopoints_data:
+                    if r["name"] == match:
+                        ep_item.name = r["name"]
+                        ep_item.address = r["address"]
+                        ep_item.city = r["city"]
+                        ep_item.lat = r["lat"]
+                        ep_item.lng = r["lng"]
+                        break
+            else:
+                primary_ep = ep_map[match]
+                db.query(Delivery).filter(Delivery.ecopoint_id == ep_item.id).update({"ecopoint_id": primary_ep.id})
+                db.delete(ep_item)
+
+        existing_names = {ep_item.name for ep_item in db.query(EcoPoint).all()}
+        for r in real_ecopoints_data:
+            if r["name"] not in existing_names:
+                db.add(EcoPoint(**r))
+        
+        db.flush()
+        print("  Ecopuntos reales de Pamplona sincronizados y sin duplicados.")
 
         ep = db.query(EcoPoint).first()
 

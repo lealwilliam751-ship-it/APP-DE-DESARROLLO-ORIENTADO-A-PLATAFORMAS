@@ -1,96 +1,88 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { QrService, QRGenerateResponse } from '../../../core/services/qr.service';
+import QRCode from 'qrcode';
 
 @Component({
   selector: 'app-citizen-qr',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
-    <div class="citizen-qr-container">
-      <div class="qr-card">
+    <div class="page-container fade-in">
+      <div class="qr-card card">
         <div class="card-header">
-          <h2>🪪 Mi Carnet EcoPuntos</h2>
-          <p>Presenta este código QR en cualquier EcoPunto de Pamplona para identificarte.</p>
+          <h2>🪪 Carnet Digital EcoPuntos</h2>
+          <p>Presenta este código QR en cualquier EcoPunto de Pamplona para identificarte</p>
         </div>
 
-        <div *ngIf="loading" class="spinner-box">
+        <div *ngIf="loading()" class="spinner-box">
           <div class="spinner"></div>
-          <p>Generando código QR personal...</p>
+          <p>Generando tu código QR personal en vivo...</p>
         </div>
 
-        <div *ngIf="errorMessage" class="alert error">
-          ⚠️ {{ errorMessage }}
+        <div *ngIf="errorMessage()" class="alert alert-error">
+          ⚠️ {{ errorMessage() }}
         </div>
 
-        <div *ngIf="!loading && qrData" class="card-body">
+        <div *ngIf="!loading() && qrData() as data" class="card-body">
           <div class="user-badge-header">
-            <div class="avatar">{{ qrData.user.name.charAt(0) }}</div>
+            <div class="avatar">{{ data.user.name.charAt(0).toUpperCase() }}</div>
             <div class="user-info">
-              <h3>{{ qrData.user.name }}</h3>
-              <span class="user-level">🌱 {{ qrData.user.level }}</span>
-              <span class="user-points">⭐ {{ qrData.user.total_points }} Puntos</span>
+              <h3>{{ data.user.name }}</h3>
+              <div class="badge-row">
+                <span class="user-level">🌱 {{ data.user.level || 'Semilla Verde' }}</span>
+                <span class="user-points">⭐ {{ data.user.total_points }} Puntos</span>
+              </div>
             </div>
           </div>
 
           <div class="qr-visual-box">
-            <!-- Representación gráfica interactiva del QR con patrón dinámico -->
             <div class="qr-frame">
-              <svg class="qr-svg" viewBox="0 0 100 100">
-                <!-- Patrón decorativo de QR -->
-                <rect x="0" y="0" width="100" height="100" fill="#ffffff" />
-                <rect x="5" y="5" width="25" height="25" fill="#1b4332" />
-                <rect x="9" y="9" width="17" height="17" fill="#ffffff" />
-                <rect x="13" y="13" width="9" height="9" fill="#1b4332" />
-
-                <rect x="70" y="5" width="25" height="25" fill="#1b4332" />
-                <rect x="74" y="9" width="17" height="17" fill="#ffffff" />
-                <rect x="78" y="13" width="9" height="9" fill="#1b4332" />
-
-                <rect x="5" y="70" width="25" height="25" fill="#1b4332" />
-                <rect x="9" y="74" width="17" height="17" fill="#ffffff" />
-                <rect x="13" y="78" width="9" height="9" fill="#1b4332" />
-
-                <!-- Puntos internos simulación -->
-                <rect x="35" y="10" width="6" height="6" fill="#2d6a4f" />
-                <rect x="45" y="10" width="10" height="6" fill="#1b4332" />
-                <rect x="40" y="25" width="15" height="6" fill="#2d6a4f" />
-                <rect x="10" y="40" width="8" height="15" fill="#1b4332" />
-                <rect x="25" y="45" width="12" height="8" fill="#2d6a4f" />
-                <rect x="45" y="40" width="20" height="20" fill="#1b4332" />
-                <rect x="70" y="40" width="10" height="10" fill="#2d6a4f" />
-                <rect x="85" y="45" width="10" height="15" fill="#1b4332" />
-                <rect x="40" y="70" width="15" height="8" fill="#2d6a4f" />
-                <rect x="60" y="75" width="15" height="15" fill="#1b4332" />
-                <rect x="80" y="80" width="15" height="15" fill="#2d6a4f" />
-              </svg>
+              <img
+                *ngIf="qrImageUrl()"
+                [src]="qrImageUrl()"
+                alt="Carnet QR EcoPuntos"
+                class="qr-img"
+                id="qrImageElement"
+              />
+              <div *ngIf="!qrImageUrl()" class="spinner" style="margin: 40px auto;"></div>
             </div>
-            <div class="user-id-code">ID Usuario: #{{ qrData.user.id }}</div>
+            <div class="user-id-code">ID de Ciudadano: <strong>#{{ data.user.id }}</strong></div>
           </div>
 
-          <div class="qr-payload-text">
-            <label>Payload encriptado / JSON:</label>
-            <code>{{ qrData.qr }}</code>
+          <div class="qr-actions">
+            <button class="btn btn-secondary btn-sm" (click)="copyPayload(data.qr)">
+              📋 {{ copied() ? '¡Copiado!' : 'Copiar Código' }}
+            </button>
+            <button class="btn btn-primary btn-sm" (click)="downloadQRImage(data.user.name)">
+              💾 Guardar Imagen de Carnet
+            </button>
           </div>
 
-          <div class="instructions">
-            📌 El gestor de punto escaneará esta pantalla con su teléfono o escáner para cargar automáticamente tus entregas.
+          <div class="qr-payload-text mt-3">
+            <label>Contenido del Código (JSON):</label>
+            <code>{{ data.qr }}</code>
+          </div>
+
+          <div class="instructions alert alert-warning mt-3">
+            📌 El Gestor de Punto escaneará este carnet (o la foto guardada) para verificar tu perfil y cargar tus entregas.
+          </div>
+
+          <div class="citizen-quick-links mt-4">
+            <a routerLink="/deliveries" class="btn btn-outline-primary btn-full">
+              📦 Realizar Pre-solicitud o Ver Mis Entregas →
+            </a>
           </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .citizen-qr-container {
-      max-width: 500px;
-      margin: 30px auto;
-      padding: 0 20px;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
     .qr-card {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0;
       overflow: hidden;
     }
     .card-header {
@@ -99,87 +91,135 @@ import { QrService, QRGenerateResponse } from '../../../core/services/qr.service
       padding: 24px;
       text-align: center;
     }
-    .card-header h2 { margin: 0 0 6px 0; font-size: 1.4rem; }
-    .card-header p { margin: 0; font-size: 0.88rem; opacity: 0.9; }
+    .card-header h2 { margin: 0 0 6px 0; font-size: 1.4rem; color: white; }
+    .card-header p { margin: 0; font-size: 0.88rem; opacity: 0.85; color: white; }
+
     .card-body { padding: 24px; text-align: center; }
+
     .user-badge-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      background: #f4fbf7;
+      gap: 14px;
+      background: #f0faf3;
+      border: 1px solid #b7e4c7;
       padding: 12px 16px;
       border-radius: 12px;
       margin-bottom: 20px;
       text-align: left;
     }
     .avatar {
-      width: 48px;
-      height: 48px;
-      background: #2d6a4f;
+      width: 46px; height: 46px;
+      background: linear-gradient(135deg, #52b788, #1b4332);
       color: white;
       border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 1.5rem;
-      font-weight: 700;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 1.3rem; font-weight: 700;
+      flex-shrink: 0;
     }
-    .user-info h3 { margin: 0 0 4px 0; font-size: 1.1rem; color: #1b4332; }
-    .user-level { font-size: 0.8rem; background: #d8f3dc; color: #1b4332; padding: 2px 6px; border-radius: 4px; margin-right: 6px; font-weight: 600; }
-    .user-points { font-size: 0.85rem; color: #d97706; font-weight: 700; }
-    .qr-visual-box {
-      margin: 20px 0;
-    }
+    .user-info h3 { margin: 0 0 4px 0; font-size: 1.05rem; color: #1b4332; }
+    .badge-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .user-level { font-size: 0.75rem; background: #d8f3dc; color: #1b4332; padding: 2px 8px; border-radius: 4px; font-weight: 700; }
+    .user-points { font-size: 0.82rem; color: #b45309; font-weight: 700; }
+
+    .qr-visual-box { margin: 20px 0; }
     .qr-frame {
-      width: 200px;
-      height: 200px;
-      margin: 0 auto 10px;
-      padding: 12px;
+      width: 220px; height: 220px;
+      margin: 0 auto 12px;
+      padding: 8px;
       background: white;
-      border-radius: 12px;
+      border-radius: 14px;
       border: 3px solid #2d6a4f;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+      display: flex; align-items: center; justify-content: center;
     }
-    .qr-svg { width: 100%; height: 100%; }
-    .user-id-code { font-weight: 700; color: #2d6a4f; font-size: 0.9rem; }
+    .qr-img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+    .user-id-code { font-weight: 600; color: #2d6a4f; font-size: 0.95rem; }
+
+    .qr-actions { display: flex; justify-content: center; gap: 10px; margin-bottom: 16px; }
+    .btn-secondary { background: #e2e8f0; color: #334155; }
+
     .qr-payload-text {
-      background: #f8f9fa;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 10px 12px;
+      border-radius: 8px;
       text-align: left;
     }
-    .qr-payload-text label { display: block; font-size: 0.75rem; color: #666; margin-bottom: 4px; }
-    .qr-payload-text code { font-size: 0.75rem; color: #333; word-break: break-all; }
-    .instructions { font-size: 0.82rem; color: #555; background: #fff8e1; padding: 10px; border-radius: 6px; border-left: 4px solid #ffb703; text-align: left; }
-    .spinner-box { padding: 40px; color: #2d6a4f; }
-    .spinner { width: 36px; height: 36px; border: 4px solid #d8f3dc; border-top-color: #2d6a4f; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 12px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .alert.error { background: #ffddd2; color: #c1121f; padding: 12px; border-radius: 6px; }
+    .qr-payload-text label { display: block; font-size: 0.72rem; color: #64748b; font-weight: 600; margin-bottom: 4px; text-transform: uppercase; }
+    .qr-payload-text code { font-size: 0.78rem; color: #334155; word-break: break-all; font-family: monospace; }
+
+    .spinner-box { padding: 40px; text-align: center; color: #2d6a4f; }
+    .btn-outline-primary { border: 1px solid #2d6a4f; color: #2d6a4f; background: transparent; font-weight: 700; }
+    .btn-outline-primary:hover { background: #2d6a4f; color: white; }
+    .btn-full { width: 100%; justify-content: center; display: flex; padding: 12px; }
+    .mt-3 { margin-top: 14px; }
+    .mt-4 { margin-top: 18px; }
   `]
 })
 export class CitizenQrComponent implements OnInit {
   private qrService = inject(QrService);
+  private cdr = inject(ChangeDetectorRef);
 
-  qrData: QRGenerateResponse | null = null;
-  loading = true;
-  errorMessage = '';
+  qrData = signal<QRGenerateResponse | null>(null);
+  qrImageUrl = signal<string>('');
+  loading = signal<boolean>(true);
+  errorMessage = signal<string>('');
+  copied = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadQR();
   }
 
   loadQR(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.qrService.generate().subscribe({
       next: (res) => {
-        this.qrData = res;
-        this.loading = false;
+        this.qrData.set(res);
+        this.loading.set(false);
+        this.renderQRCode(res.qr);
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorMessage = err.error?.detail || 'Error al generar el código QR personal.';
-        this.loading = false;
+        this.errorMessage.set(err.error?.detail || 'Error al generar el código QR personal.');
+        this.loading.set(false);
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  private renderQRCode(payload: string): void {
+    QRCode.toDataURL(payload, {
+      width: 400,
+      margin: 1,
+      color: {
+        dark: '#1b4332',
+        light: '#ffffff'
+      }
+    })
+    .then(url => {
+      this.qrImageUrl.set(url);
+      this.cdr.detectChanges();
+    })
+    .catch(err => {
+      console.error('Error generando DataURL de QR:', err);
+    });
+  }
+
+  copyPayload(payload: string): void {
+    navigator.clipboard.writeText(payload).then(() => {
+      this.copied.set(true);
+      this.cdr.detectChanges();
+      setTimeout(() => { this.copied.set(false); this.cdr.detectChanges(); }, 2000);
+    });
+  }
+
+  downloadQRImage(userName: string): void {
+    const url = this.qrImageUrl();
+    if (!url) return;
+
+    const a = document.createElement('a');
+    a.download = `Carnet_EcoPuntos_${userName.replace(/\s+/g, '_')}.png`;
+    a.href = url;
+    a.click();
   }
 }
