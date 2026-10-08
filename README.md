@@ -60,11 +60,11 @@ graph TD
 
 | Documento | Descripción |
 |---|---|
-| [`Documento_BD_Normalizacion_EcoPuntos.md`](./Documento_BD_Normalizacion_EcoPuntos.md) | Diagrama ERD (Mermaid) + Normalización 1FN, 2FN, 3FN con las tablas del sistema |
-| [`Plan_Implementacion_EcoPuntos_Pamplona_V3.docx`](./Plan_Implementacion_EcoPuntos_Pamplona_V3.docx) | Plan de implementación oficial V3 para la ciudad de Pamplona |
-| [`Mockups_Planificacion_Interfaces_EcoPuntos_v2 (a).docx`](./Mockups_Planificacion_Interfaces_EcoPuntos_v2%20%28a%29.docx) | Especificación gráfica de interfaces, diagramas wireframe y diseño UX |
-| [`Plan_Implementacion_EcoPuntos_Angular_FastAPI.md`](./Plan_Implementacion_EcoPuntos_Angular_FastAPI.md) | Documento de planeación técnica del stack Angular 18 + FastAPI |
-| [`Plan_Migracion_EcoPuntos_Angular_FastAPI.md`](./Plan_Migracion_EcoPuntos_Angular_FastAPI.md) | Plan de migración tecnológica a la arquitectura actual |
+| [`Documento_BD_Normalizacion_EcoPuntos.md`](./docs/Documento_BD_Normalizacion_EcoPuntos.md) | Diagrama ERD (Mermaid) + Normalización 1FN, 2FN, 3FN con las tablas del sistema |
+| [`Plan_Implementacion_EcoPuntos_Pamplona_V3.docx`](./docs/Plan_Implementacion_EcoPuntos_Pamplona_V3.docx) | Plan de implementación oficial V3 para la ciudad de Pamplona |
+| [`Mockups_Planificacion_Interfaces_EcoPuntos_v2 (a).docx`](./docs/Mockups_Planificacion_Interfaces_EcoPuntos_v2%20%28a%29.docx) | Especificación gráfica de interfaces, diagramas wireframe y diseño UX |
+| [`Plan_Implementacion_EcoPuntos_Angular_FastAPI.md`](./docs/Plan_Implementacion_EcoPuntos_Angular_FastAPI.md) | Documento de planeación técnica del stack Angular 18 + FastAPI |
+| [`Plan_Migracion_EcoPuntos_Angular_FastAPI.md`](./docs/Plan_Migracion_EcoPuntos_Angular_FastAPI.md) | Plan de migración tecnológica a la arquitectura actual |
 
 ---
 
@@ -212,10 +212,6 @@ DESARROLLO DE LA APP DE DESARROLLO ORIENTADO A PLATAFORMAS/
 │   └── seed_completo.py          ← Inicialización DDL y sembrado de 6 EcoPuntos de Pamplona
 ├── ver_base_datos.py             ← Script para inspeccionar las tablas SQLite en consola
 ├── start.bat                     ← Script de arranque rápido (FastAPI + Angular)
-├── Documento_BD_Normalizacion_EcoPuntos.md ← Normalización 1FN, 2FN, 3FN y ERD
-├── Plan_Implementacion_EcoPuntos_Pamplona_V3.docx ← Plan de implementación oficial V3
-├── Mockups_Planificacion_Interfaces_EcoPuntos_v2 (a).docx ← Diseños UX y wireframes
-├── Plan_Implementacion_EcoPuntos_Angular_FastAPI.md
-└── Plan_Migracion_EcoPuntos_Angular_FastAPI.md
+└── docs/                         ← Documentación del proyecto (BD, Planes V3, Mockups v2)
 ```
 
