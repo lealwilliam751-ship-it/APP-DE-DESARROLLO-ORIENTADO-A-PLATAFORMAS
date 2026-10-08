@@ -15,28 +15,28 @@ El sistema soporta 3 flujos operativos unificados según el rol o estado del usu
 
 ```mermaid
 graph TD
-    A[Inicio / Login] --> B{Autenticado?}
-    B -- No / Modo Invitado 🟢 --> C[Vista Pública: Mapa Ecopuntos, Premios y Ranking]
-    B -- Sí --> D{Rol del Usuario}
+    A["Inicio / Login"] --> B{"Autenticado?"}
+    B -- No / Modo Invitado 🟢 --> C["Vista Pública: Mapa Ecopuntos, Premios y Ranking"]
+    B -- Sí --> D{"Rol del Usuario"}
     
-    D -- Ciudadano --> E[Carnet QR & Pre-solicitud]
-    E --> E1[Presentar Carnet QR en EcoPunto]
-    E --> E2[Crear Ticket de Pre-solicitud ⏳ Pendiente]
-    E --> E3[Consultar Mis Entregas e Historial]
-    E --> E4[Catálogo y Canje de Premios]
+    D -- Ciudadano --> E["Carnet QR & Pre-solicitud"]
+    E --> E1["Presentar Carnet QR en EcoPunto"]
+    E --> E2["Crear Ticket de Pre-solicitud ⏳ Pendiente"]
+    E --> E3["Consultar Mis Entregas e Historial"]
+    E --> E4["Catálogo y Canje de Premios"]
 
-    D -- Gestor de Punto --> F[Módulo de Punto de Acopio]
-    F --> F1[Escaneo de Carnet QR o Búsqueda por ID]
-    F1 --> F2[Formulario de Pesaje en Báscula ⚖️]
-    F2 --> F3[Aprobación Inmediata y Acreditación de Puntos ✅]
-    F --> F4[Bandeja de Pre-solicitudes Pendientes 📥]
+    D -- Gestor de Punto --> F["Módulo de Punto de Acopio"]
+    F --> F1["Escaneo de Carnet QR o Búsqueda por ID"]
+    F1 --> F2["Formulario de Pesaje en Báscula ⚖️"]
+    F2 --> F3["Aprobación Inmediata y Acreditación de Puntos ✅"]
+    F --> F4["Bandeja de Pre-solicitudes Pendientes 📥"]
 
-    D -- Administrador --> G[Dashboard Administrador]
-    G --> G1[Gestión y Registro de Gestores de Punto]
-    G --> G2[CRUD de Ecopuntos y Ubicaciones]
-    G --> G3[CRUD de Materiales (Puntos/CO₂ por kg)]
-    G --> G4[CRUD de Catálogo de Recompensas]
-    G --> G5[Métricas Ejecutivas Globales en Tiempo Real]
+    D -- Administrador --> G["Dashboard Administrador"]
+    G --> G1["Gestión y Registro de Gestores de Punto"]
+    G --> G2["CRUD de Ecopuntos y Ubicaciones"]
+    G --> G3["CRUD de Materiales (Puntos/CO₂ por kg)"]
+    G --> G4["CRUD de Catálogo de Recompensas"]
+    G --> G5["Métricas Ejecutivas Globales en Tiempo Real"]
 ```
 
 ### 0️⃣ Modo Invitado (Acceso Público)
