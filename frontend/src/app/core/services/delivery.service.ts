@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Delivery, CreateDeliveryDTO } from '../models/delivery.model';
 
@@ -21,15 +21,21 @@ export class DeliveryService {
   }
 
   create(data: CreateDeliveryDTO): Observable<Delivery> {
-    return this.http.post<Delivery>(this.apiUrl, data);
+    return this.http.post<{ delivery: Delivery }>(this.apiUrl, data).pipe(
+      map(res => res.delivery)
+    );
   }
 
   approve(id: number): Observable<Delivery> {
-    return this.http.patch<Delivery>(`${this.apiUrl}/${id}/approve`, {});
+    return this.http.patch<{ result: any; delivery: Delivery }>(`${this.apiUrl}/${id}/approve`, {}).pipe(
+      map(res => res.delivery)
+    );
   }
 
   reject(id: number): Observable<Delivery> {
-    return this.http.patch<Delivery>(`${this.apiUrl}/${id}/reject`, {});
+    return this.http.patch<{ delivery: Delivery }>(`${this.apiUrl}/${id}/reject`, {}).pipe(
+      map(res => res.delivery)
+    );
   }
 
   cancel(id: number): Observable<void> {

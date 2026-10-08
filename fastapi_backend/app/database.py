@@ -22,6 +22,7 @@ else:
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         sqlite_file = os.path.join(base_dir, "ecopuntos.db")
         sqlite_url = f"sqlite:///{sqlite_file}"
+        logger.warning(f"No se pudo conectar a PostgreSQL ({e}). Usando SQLite local en: {sqlite_url}")
         engine = create_engine(sqlite_url, connect_args={"check_same_thread": False})
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

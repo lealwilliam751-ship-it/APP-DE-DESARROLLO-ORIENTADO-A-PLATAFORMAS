@@ -8,3 +8,4 @@ from app.database import engine, Base, SessionLocal
 def setup_test_database():
     Base.metadata.create_all(bind=engine)
     yield
+

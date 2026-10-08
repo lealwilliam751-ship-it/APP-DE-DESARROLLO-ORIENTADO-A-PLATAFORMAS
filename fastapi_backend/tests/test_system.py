@@ -17,7 +17,7 @@ def setup_db():
         db.add(Material(name="Plástico Test", points_per_kg=50, co2_kg_per_kg=1.5))
     if db.query(EcoPoint).count() == 0:
         db.add(EcoPoint(name="Ecopunto Central Test", address="Calle 6 #4-20", city="Pamplona", lat=7.375, lng=-72.648))
-    if db.query(Reward).count() == 0:
+    if not db.query(Reward).filter(Reward.point_cost <= 1000).first():
         db.add(Reward(name="Bono Test", description="Bono eco", category="Descuento", point_cost=100, stock=10))
     if db.query(User).filter(User.email == "admin@ecopuntos.com").count() == 0:
         db.add(User(id=9001, name="Admin Test", email="admin@ecopuntos.com", password_hash=get_password_hash("admin123"), role=UserRole.Administrador))

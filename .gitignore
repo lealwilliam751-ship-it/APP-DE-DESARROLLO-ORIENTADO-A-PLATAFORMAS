@@ -73,8 +73,6 @@ yarn-error.log*
 .system_generated/
 scratch/
 
-# ── Angular específico ────────────────────────────────────────
-.angular/
-.sass-cache/
-connect.lock
-typings/
+# ── Guía local de sustentación (NO subir a GitHub) ──────────
+Guia_Sustentacion_Defensa_EcoPuntos.md
+

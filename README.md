@@ -3,20 +3,20 @@
 Plataforma web de reciclaje para la ciudad de **Pamplona, Norte de Santander (Colombia)**, desarrollada para el curso **Desarrollo Orientado a Plataformas** de la Universidad de Pamplona.
 
 **Stack Tecnológico:**
-- **Frontend:** Angular 17+ (Standalone Components, TypeScript, ReactiveForms, Signals, Interceptores, Guards, QRCode)
-- **Backend:** FastAPI 0.100+ (Python 3.13, Pydantic v2, SQLAlchemy 2.0+, JWT, Uvicorn)
+- **Frontend:** Angular 18+ (Standalone Components, TypeScript, ReactiveForms, Signals, Interceptores, Guards, QRCode, Modo Invitado)
+- **Backend:** FastAPI 0.142+ (Python 3.13, Pydantic v2, SQLAlchemy 2.0+, JWT, Uvicorn)
 - **Base de Datos:** PostgreSQL 15 + PostGIS 3.3 (Docker) / Resiliencia SQLite local (`ecopuntos.db`)
 
 ---
 
 ## Cómo funciona la aplicación (Flujos Unificados)
 
-El sistema soporta 2 flujos operativos unificados según el rol del usuario:
+El sistema soporta 3 flujos operativos unificados según el rol o estado del usuario:
 
 ```mermaid
 graph TD
     A[Inicio / Login] --> B{Autenticado?}
-    B -- No --> C[Vista Pública: Mapa Ecopuntos, Premios y Ranking]
+    B -- No / Modo Invitado 🟢 --> C[Vista Pública: Mapa Ecopuntos, Premios y Ranking]
     B -- Sí --> D{Rol del Usuario}
     
     D -- Ciudadano --> E[Carnet QR & Pre-solicitud]
@@ -26,7 +26,7 @@ graph TD
     E --> E4[Catálogo y Canje de Premios]
 
     D -- Gestor de Punto --> F[Módulo de Punto de Acopio]
-    F --> F1[Escaneo de Carnet QR o Foto]
+    F --> F1[Escaneo de Carnet QR o Búsqueda por ID]
     F1 --> F2[Formulario de Pesaje en Báscula ⚖️]
     F2 --> F3[Aprobación Inmediata y Acreditación de Puntos ✅]
     F --> F4[Bandeja de Pre-solicitudes Pendientes 📥]
@@ -39,9 +39,13 @@ graph TD
     G --> G5[Métricas Ejecutivas Globales en Tiempo Real]
 ```
 
+### 0️⃣ Modo Invitado (Acceso Público)
+1. **Acceso sin Registro**: Permite ingresar desde la pantalla de login o la barra de navegación sin credenciales.
+2. **Exploración Libre**: Consulta pública de los 6 EcoPuntos oficiales de Pamplona en mapa interactivo, catálogo de recompensas y ranking de líderes en tiempo real.
+
 ### 1️⃣ Flujo Presencial en el EcoPunto (Flujo Principal)
 1. **Llegada del Ciudadano**: Abre su "Carnet Digital QR" en la app.
-2. **Escaneo por el Gestor**: El Gestor escanea o carga la foto del QR en `/gestor/scan`.
+2. **Escaneo por el Gestor**: El Gestor escanea o busca la ID del QR en `/gestor/scan`.
 3. **Pantalla de Pesaje Presencial**: La app abre automáticamente la pantalla de pesaje bloqueada para dicho ciudadano.
 4. **Registro de Kilos en Báscula**: El Gestor ingresa los kilos reales pesados físicamente (ej. 2.5 kg PET, 3 kg Cartón).
 5. **Aprobación Inmediata**: Al presionar **Aprobar Entrega**, la entrega queda aprobada al instante y los EcoPuntos se acreditan de inmediato al ciudadano.
@@ -56,10 +60,11 @@ graph TD
 
 | Documento | Descripción |
 |---|---|
-| [`Plan_Implementacion_EcoPuntos_Angular_FastAPI.md`](./Plan_Implementacion_EcoPuntos_Angular_FastAPI.md) | Documento de planeación e implementación del stack Angular + FastAPI |
-| [`Plan_Migracion_EcoPuntos_Angular_FastAPI.md`](./Plan_Migracion_EcoPuntos_Angular_FastAPI.md) | Plan de migración tecnológica del stack anterior a Angular + FastAPI |
 | [`Documento_BD_Normalizacion_EcoPuntos.md`](./Documento_BD_Normalizacion_EcoPuntos.md) | Diagrama ERD (Mermaid) + Normalización 1FN, 2FN, 3FN con las tablas del sistema |
-| [`Guia_Sustentacion_Defensa_EcoPuntos.md`](./Guia_Sustentacion_Defensa_EcoPuntos.md) | Guía de sustentación y respuestas a preguntas frecuentes del docente |
+| [`Plan_Implementacion_EcoPuntos_Pamplona_V3.docx`](./Plan_Implementacion_EcoPuntos_Pamplona_V3.docx) | Plan de implementación oficial V3 para la ciudad de Pamplona |
+| [`Mockups_Planificacion_Interfaces_EcoPuntos_v2 (a).docx`](./Mockups_Planificacion_Interfaces_EcoPuntos_v2%20%28a%29.docx) | Especificación gráfica de interfaces, diagramas wireframe y diseño UX |
+| [`Plan_Implementacion_EcoPuntos_Angular_FastAPI.md`](./Plan_Implementacion_EcoPuntos_Angular_FastAPI.md) | Documento de planeación técnica del stack Angular 18 + FastAPI |
+| [`Plan_Migracion_EcoPuntos_Angular_FastAPI.md`](./Plan_Migracion_EcoPuntos_Angular_FastAPI.md) | Plan de migración tecnológica a la arquitectura actual |
 
 ---
 
@@ -70,14 +75,18 @@ graph TD
 - **Python** 3.11+
 - **Docker Desktop** (opcional para PostgreSQL container)
 
-### Paso 1 — Iniciar la Base de Datos (Opcional Docker PostgreSQL / SQLite Local)
-
-```bash
-docker-compose up -d
+### Paso 1 — Arranque Rápido con 1 Clic (Windows)
+Ejecutar el archivo ejecutable en la raíz del proyecto:
+```cmd
+start.bat
 ```
+*(Inicia automáticamente el servidor FastAPI en el puerto 3000 y la app Angular en el puerto 4200).*
 
-### Paso 2 — Configurar y Arrancar el Backend FastAPI
+---
 
+### Paso 2 — Ejecución Manual Paso a Paso
+
+#### Backend (FastAPI)
 ```bash
 cd fastapi_backend
 
@@ -85,8 +94,6 @@ cd fastapi_backend
 python -m venv .venv
 # En Windows PowerShell:
 .venv\Scripts\Activate.ps1
-# En Linux/macOS:
-# source .venv/bin/activate
 
 # 2. Instalar dependencias
 pip install -r requirements.txt
@@ -103,8 +110,7 @@ La **API REST** queda disponible en:
 - **Swagger UI (Documentación interactiva):** `http://localhost:3000/docs`
 - ReDoc: `http://localhost:3000/redoc`
 
-### Paso 3 — Iniciar el Frontend Angular
-
+#### Frontend (Angular)
 ```bash
 cd frontend
 npm install
@@ -147,7 +153,7 @@ tests/test_system.py::test_full_system_flow PASSED                       [ 86%]
 tests/test_unified_workflow.py::test_unified_workflow_in_person_gestor_delivery PASSED [ 93%]
 tests/test_unified_workflow.py::test_unified_workflow_citizen_pre_solicitud_ticket PASSED [100%]
 
-======================== 15 passed in 5.85s =========================
+======================== 15 passed in 6.89s =========================
 ```
 
 ---
@@ -160,6 +166,7 @@ tests/test_unified_workflow.py::test_unified_workflow_citizen_pre_solicitud_tick
 | **Gestor de Punto** | `gestor@ecopuntos.com` | `gestor123` | Pesaje presencial en báscula, aprobación instantánea, escáner QR |
 | **Ciudadano (1° Ranking)** | `ana@ecopuntos.com` | `eco123` | Registro/pre-solicitud, canje de premios, carnet QR, ranking |
 | **Ciudadano (2° Ranking)** | `juan@ecopuntos.com` | `eco123` | Historial de entregas, catálogo de recompensas |
+| **Modo Invitado** | *(Sin inicio de sesión)* | N/A | Acceso directo a Vistas Públicas (Ecopuntos, Premios, Ranking) |
 
 ---
 
@@ -177,8 +184,8 @@ tests/test_unified_workflow.py::test_unified_workflow_citizen_pre_solicitud_tick
 ## Estructura del Proyecto
 
 ```
-ECOPUNTOS PAMPLONA/
-├── frontend/                     ← Angular 17+ (Standalone Components)
+DESARROLLO DE LA APP DE DESARROLLO ORIENTADO A PLATAFORMAS/
+├── frontend/                     ← Angular 18+ (Standalone Components)
 │   └── src/app/
 │       ├── core/
 │       │   ├── models/           ← User, Delivery, EcoPoint, Material, Reward
@@ -186,7 +193,7 @@ ECOPUNTOS PAMPLONA/
 │       │   │                        MaterialService, RewardService, AdminService, QrService
 │       │   ├── interceptors/     ← AuthInterceptor (JWT), ErrorInterceptor
 │       │   └── guards/           ← AuthGuard, RoleGuard
-│       ├── shared/               ← NavbarComponent (Navegación dinámica por rol)
+│       ├── shared/               ← NavbarComponent (Navegación dinámica por rol + Invitado)
 │       └── features/             ← Admin (Metrics, Gestor, EcoPoints, Materials, Rewards),
 │                                    Gestor (Scan), Citizen (QR), Dashboard, Deliveries,
 │                                    EcoPoints Detail, Ranking, Rewards
@@ -200,19 +207,15 @@ ECOPUNTOS PAMPLONA/
 │   │   ├── schemas/schemas.py    ← DTOs / Schemas Pydantic v2
 │   │   └── routers/              ← auth, ecopoints, materials, deliveries,
 │   │                                rewards, ranking, admin, qr
-│   ├── tests/
-│   │   ├── test_api.py           ← Tests de salud y endpoints públicos
-│   │   ├── test_error_cases.py   ← Tests de respuestas de error (401, 403, 422, 404, 400)
-│   │   ├── test_register.py      ← Tests de registro y validación de correo
-│   │   ├── test_system.py        ← Test de integración end-to-end completo
-│   │   └── test_unified_workflow.py ← Tests de pesaje presencial y pre-solicitudes
+│   ├── tests/                    ← Suite completa de 15 pruebas automatizadas
 │   ├── requirements.txt          ← Dependencias Python con versiones
-│   └── seed_completo.py          ← Inicialización DDL y sembrado de datos
+│   └── seed_completo.py          ← Inicialización DDL y sembrado de 6 EcoPuntos de Pamplona
 ├── ver_base_datos.py             ← Script para inspeccionar las tablas SQLite en consola
-├── Documento_BD_Normalizacion_EcoPuntos.md
+├── start.bat                     ← Script de arranque rápido (FastAPI + Angular)
+├── Documento_BD_Normalizacion_EcoPuntos.md ← Normalización 1FN, 2FN, 3FN y ERD
+├── Plan_Implementacion_EcoPuntos_Pamplona_V3.docx ← Plan de implementación oficial V3
+├── Mockups_Planificacion_Interfaces_EcoPuntos_v2 (a).docx ← Diseños UX y wireframes
 ├── Plan_Implementacion_EcoPuntos_Angular_FastAPI.md
-├── Guia_Sustentacion_Defensa_EcoPuntos.md
-├── docker-compose.yml
-├── start.js                      ← Script de arranque rápido (FastAPI + Angular)
-└── package.json                  ← Scripts npm raíz
+└── Plan_Migracion_EcoPuntos_Angular_FastAPI.md
 ```
+

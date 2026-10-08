@@ -39,7 +39,7 @@ def get_pending_deliveries(
     for d in deliveries:
         d_out = DeliveryOut.model_validate(d)
         if d.user:
-            d_out.citizen_name = d.user.name
+            d_out = d_out.model_copy(update={"citizen_name": d.user.name})
         out.append(d_out)
     return out
 
@@ -56,8 +56,11 @@ def create_delivery(
     provided_citizen_id = data.get_citizen_id()
     if provided_citizen_id and current_user.role in [UserRole.Gestor_de_Punto, UserRole.Administrador]:
         citizen = db.query(User).filter(User.id == provided_citizen_id).first()
-        if citizen:
-            target_user_id = citizen.id
+        if not citizen:
+            raise HTTPException(status_code=404, detail="El ciudadano especificado no existe.")
+        if citizen.role != UserRole.Ciudadano:
+            raise HTTPException(status_code=400, detail="Solo se pueden registrar entregas a usuarios con rol Ciudadano.")
+        target_user_id = citizen.id
 
     # Determine initial status: if Gestor/Admin creates delivery in person, auto-approve immediately
     initial_status = DeliveryStatus.pending
