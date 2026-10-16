@@ -24,27 +24,25 @@ declare const L: any;
       }
 
       @if (errorMessage()) {
-        <div class="alert-error">⚠️ {{ errorMessage() }}</div>
+        <div class="alert-error"> {{ errorMessage() }}</div>
       }
 
       @if (!loading() && ecopoint()) {
-        <div class="content-grid">
-
-          <!-- LEFT: Info Panel -->
+        <div class="content-grid">          <!-- LEFT: Info Panel -->
           <div class="info-panel">
             <div class="panel-header">
-              <div class="ep-icon">♻️</div>
+              <div class="ep-icon"><i class="bi bi-geo-alt-fill text-white"></i></div>
               <div>
                 <span class="city-badge">{{ ecopoint()!.city }}</span>
                 <h1>{{ ecopoint()!.name }}</h1>
-                <p class="address">📍 {{ ecopoint()!.address }}</p>
+                <p class="address"><i class="bi bi-geo-alt me-1"></i>{{ ecopoint()!.address }}</p>
               </div>
             </div>
 
             <!-- Distance banner (shown when user location is available) -->
             @if (userLat() !== null) {
               <div class="distance-banner">
-                <span class="distance-icon">📏</span>
+                <span class="distance-icon"><i class="bi bi-compass-fill text-success"></i></span>
                 <div>
                   <strong>{{ distanceKm() }} km de distancia</strong>
                   <span>desde tu ubicación actual</span>
@@ -60,13 +58,13 @@ declare const L: any;
             }
             @if (locationStatus() === 'denied') {
               <div class="location-status denied">
-                📵 Permiso de ubicación denegado
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> Permiso de ubicación denegado
               </div>
             }
 
             <!-- Coordinates -->
             <div class="info-block">
-              <h3>🌐 Coordenadas GPS</h3>
+              <h3><i class="bi bi-crosshair me-2"></i> Coordenadas GPS</h3>
               <div class="coords-row">
                 <div class="coord-chip">
                   <span class="coord-label">Latitud</span>
@@ -80,19 +78,19 @@ declare const L: any;
 
               <!-- Navigation button: uses user's current coords as origin if available -->
               <a [href]="getMapsUrl()" target="_blank" rel="noopener noreferrer" class="maps-link">
-                🗺️ {{ userLat() !== null ? 'Navegar desde mi ubicación' : 'Abrir en Google Maps' }}
+                <i class="bi bi-box-arrow-up-right me-1"></i> {{ userLat() !== null ? 'Navegar desde mi ubicación' : 'Abrir en Google Maps' }}
               </a>
 
               @if (userLat() === null && locationStatus() !== 'asking' && locationStatus() !== 'denied') {
                 <button class="btn-locate" (click)="requestLocation()">
-                  📍 Usar mi ubicación para ruta
+                  <i class="bi bi-geo-fill me-1"></i> Usar mi ubicación para ruta
                 </button>
               }
             </div>
 
             <!-- Schedule -->
             <div class="info-block">
-              <h3>🕒 Horario de Atención</h3>
+              <h3><i class="bi bi-clock-fill me-2"></i> Horario de Atención</h3>
               <div class="schedule-list">
                 <div class="schedule-row"><span>Lun – Vie</span><strong>8:00 AM – 5:00 PM</strong></div>
                 <div class="schedule-row"><span>Sábados</span><strong>8:00 AM – 2:00 PM</strong></div>
@@ -102,18 +100,18 @@ declare const L: any;
 
             <!-- Materials -->
             <div class="info-block">
-              <h3>♻️ Materiales Aceptados</h3>
+              <h3><i class="bi bi-recycle me-2"></i> Materiales Aceptados</h3>
               @if (materials().length === 0) {
                 <p class="no-materials">Cargando materiales...</p>
               }
               <div class="materials-list">
                 @for (m of materials(); track m.id) {
                   <div class="material-item">
-                    <div class="mat-icon-box">📦</div>
+                    <div class="mat-icon-box"><i class="bi bi-box-seam text-success"></i></div>
                     <div class="mat-info">
                       <strong>{{ m.name }}</strong>
-                      <span class="mat-pts">⭐ {{ m.points_per_kg }} puntos/kg</span>
-                      <span class="mat-co2">🌱 {{ m.co2_kg_per_kg }} kg CO₂/kg</span>
+                      <span class="mat-pts"><i class="bi bi-star-fill text-warning me-1"></i>{{ m.points_per_kg }} puntos/kg</span>
+                      <span class="mat-co2"><i class="bi bi-leaf-fill text-success me-1"></i>{{ m.co2_kg_per_kg }} kg CO₂/kg</span>
                     </div>
                   </div>
                 }
@@ -124,10 +122,10 @@ declare const L: any;
           <!-- RIGHT: Map Panel -->
           <div class="map-panel">
             <div class="map-header">
-              <h3>📍 Mapa Interactivo</h3>
+              <h3><i class="bi bi-map-fill text-success me-2"></i>Mapa Interactivo</h3>
               <span class="map-subtitle">
                 @if (userLat() !== null) {
-                  🔵 Tu ubicación · 🟢 EcoPunto
+                   Tu ubicación · EcoPunto
                 } @else {
                   Haz clic en el marcador para más info
                 }
@@ -449,7 +447,7 @@ export class EcopointDetailComponent implements OnInit, OnDestroy {
     return `https://www.google.com/maps/search/?api=1&query=${dest}`;
   }
 
-  // ─── Map Logic ───────────────────────────────────────────────────────────────
+  // Map Logic 
 
   private tryInitMap(attempt: number): void {
     if (this.mapInitialized || attempt > 25) return;
@@ -470,7 +468,7 @@ export class EcopointDetailComponent implements OnInit, OnDestroy {
     this.map = L.map('ecopoint-map', { zoomControl: true }).setView([epLat, epLng], 16);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      attribution: ' <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19
     }).addTo(this.map);
 
@@ -481,7 +479,7 @@ export class EcopointDetailComponent implements OnInit, OnDestroy {
         border-radius:50% 50% 50% 0;transform:rotate(-45deg);
         border:3px solid white;box-shadow:0 3px 12px rgba(0,0,0,0.35);
         display:flex;align-items:center;justify-content:center;">
-        <span style="transform:rotate(45deg);font-size:18px;">♻️</span>
+        <i class="bi bi-recycle" style="transform:rotate(45deg);font-size:16px;color:white;"></i>
       </div>`,
       className: '',
       iconSize: [40, 40],
@@ -493,7 +491,7 @@ export class EcopointDetailComponent implements OnInit, OnDestroy {
       .addTo(this.map)
       .bindPopup(`
         <div style="font-family:system-ui;min-width:160px;">
-          <strong style="color:#1b4332;">🟢 ${ep.name}</strong><br>
+          <strong style="color:#1b4332;"> ${ep.name}</strong><br>
           <span style="color:#6b7280;font-size:0.82rem;">${ep.address}, ${ep.city}</span>
         </div>`, { maxWidth: 220 })
       .openPopup();
@@ -535,7 +533,7 @@ export class EcopointDetailComponent implements OnInit, OnDestroy {
 
     this.userMarker = L.marker([lat, lng], { icon: userIcon })
       .addTo(this.map)
-      .bindPopup('<div style="font-family:system-ui;"><strong style="color:#1d4ed8;">🔵 Tu ubicación actual</strong></div>');
+      .bindPopup('<div style="font-family:system-ui;"><strong style="color:#1d4ed8;"> Tu ubicación actual</strong></div>');
 
     // Draw dashed route line
     const ep = this.ecopoint()!;

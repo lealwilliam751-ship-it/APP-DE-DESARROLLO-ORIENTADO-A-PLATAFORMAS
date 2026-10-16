@@ -65,11 +65,11 @@ body.theme-dark {
   --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Reset & Base ── */
+/* Reset & Base */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { background: var(--bg-app); color: var(--text-main); font-family: var(--font-main); min-height: 100vh; display: flex; justify-content: center; overflow-x: hidden; }
 
-/* ── Utilidades ── */
+/* Utilidades */
 .text-emerald { color: #10b981 !important; }
 .text-teal    { color: #2dd4bf !important; }
 .text-amber   { color: #fbbf24 !important; }

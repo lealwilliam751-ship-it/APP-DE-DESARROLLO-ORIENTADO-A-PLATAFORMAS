@@ -12,7 +12,7 @@ import { EcoPoint } from '../../core/models/ecopoint.model';
     <div class="page-container fade-in">
       <div class="page-header">
         <div>
-          <h2>📍 Puntos de Reciclaje (EcoPuntos)</h2>
+          <h2><i class="bi bi-geo-alt-fill text-success me-2"></i>Puntos de Reciclaje (EcoPuntos)</h2>
           <p style="color: #64748b; font-size: 0.95rem;">Encuentra el punto de acopio y reciclaje más cercano en Pamplona</p>
         </div>
       </div>
@@ -22,12 +22,12 @@ import { EcoPoint } from '../../core/models/ecopoint.model';
 
       <!-- Error alert -->
       <div class="alert alert-error" *ngIf="errorMessage()">
-        ⚠️ {{ errorMessage() }}
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage() }}
       </div>
 
       <!-- Empty state -->
       <div class="card empty-state" *ngIf="!loading() && ecopoints().length === 0 && !errorMessage()">
-        <div class="empty-icon">📍</div>
+        <div class="empty-icon"><i class="bi bi-geo-alt text-muted" style="font-size: 2.5rem;"></i></div>
         <p>No se encontraron EcoPuntos registrados en Pamplona.</p>
       </div>
 
@@ -35,20 +35,20 @@ import { EcoPoint } from '../../core/models/ecopoint.model';
       <div class="grid-3" *ngIf="!loading() && ecopoints().length > 0">
         <div *ngFor="let ep of ecopoints()" class="ep-card card">
           <div class="ep-header">
-            <div class="ep-badge-icon">♻️</div>
+            <div class="ep-badge-icon"><i class="bi bi-recycle text-success"></i></div>
             <span class="ep-city-tag">{{ ep.city }}</span>
           </div>
 
           <h3 class="ep-title">{{ ep.name }}</h3>
-          <p class="ep-address">📍 {{ ep.address }}</p>
+          <p class="ep-address"><i class="bi bi-geo-alt text-muted me-1"></i>{{ ep.address }}</p>
 
           <div class="ep-coords">
-            <span>🌐 Lat: <strong>{{ ep.lat }}</strong></span>
-            <span>Lng: <strong>{{ ep.lng }}</strong></span>
+            <span><i class="bi bi-compass me-1"></i>Lat: <strong>{{ ep.lat }}</strong></span>
+            <span><i class="bi bi-compass me-1"></i>Lng: <strong>{{ ep.lng }}</strong></span>
           </div>
 
           <a [routerLink]="['/ecopoints', ep.id]" class="btn btn-primary btn-full mt-auto">
-            Ver Detalle y Mapa →
+            Ver Detalle y Mapa <i class="bi bi-arrow-right ms-1"></i>
           </a>
         </div>
       </div>

@@ -13,23 +13,13 @@ import { AuthService } from '../../../core/services/auth.service';
       <!-- Left panel -->
       <div class="auth-hero">
         <div class="hero-content">
-          <div class="hero-logo">🌱</div>
-          <h1>EcoPuntos<br><span>Pamplona</span></h1>
-          <p>Recicla, gana puntos y cambia tu ciudad.<br>Únete al movimiento verde de Pamplona.</p>
-          <div class="hero-stats">
-            <div class="hstat">
-              <span class="hstat-val">1,200+</span>
-              <span class="hstat-lbl">Ciudadanos activos</span>
-            </div>
-            <div class="hstat">
-              <span class="hstat-val">3 ton</span>
-              <span class="hstat-lbl">Recicladas este mes</span>
-            </div>
-            <div class="hstat">
-              <span class="hstat-val">18</span>
-              <span class="hstat-lbl">Ecopuntos activos</span>
+          <div class="hero-logo">
+            <div class="hero-logo-card">
+              <img src="assets/logo.png" alt="EcoPuntos Pamplona" class="hero-logo-img">
             </div>
           </div>
+          <h1>EcoPuntos<br><span>Pamplona</span></h1>
+          <p>Recicla, gana puntos y cambia tu ciudad.<br>Únete al movimiento verde de Pamplona.</p>
         </div>
         <div class="hero-decoration"></div>
       </div>
@@ -43,7 +33,7 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
 
           <div class="alert alert-error" *ngIf="errorMessage">
-            <span>⚠️</span> {{ errorMessage }}
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
           </div>
 
           <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
@@ -72,7 +62,7 @@ import { AuthService } from '../../../core/services/auth.service';
                   [class.invalid]="f['password'].invalid && f['password'].touched"
                 />
                 <button type="button" class="eye-btn" (click)="showPass.set(!showPass())">
-                  {{ showPass() ? '🙈' : '👁️' }}
+                  <i class="bi" [ngClass]="showPass() ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
                 </button>
               </div>
               <span class="field-error" *ngIf="f['password'].invalid && f['password'].touched">
@@ -86,36 +76,18 @@ import { AuthService } from '../../../core/services/auth.service';
               class="btn btn-primary btn-full btn-lg submit-btn"
               [disabled]="loginForm.invalid || isLoading"
             >
-              <span *ngIf="!isLoading">Ingresar a la plataforma →</span>
+              <span *ngIf="!isLoading"><i class="bi bi-box-arrow-in-right me-2"></i>Ingresar a la plataforma</span>
               <span *ngIf="isLoading" class="loading-text">
                 <span class="dot-spinner"></span> Verificando...
               </span>
             </button>
           </form>
 
-          <!-- Quick access -->
-          <div class="quick-access">
-            <div class="qa-label">Acceso rápido (demo)</div>
-            <div class="qa-btns">
-              <button id="btn-demo-ciudadano" class="qa-btn ciudadano" (click)="fillAndLogin('1001','eco123')">
-                <span class="qa-icon">🧑</span>
-                <div><strong>Ciudadano</strong><small>eco123</small></div>
-              </button>
-              <button id="btn-demo-gestor" class="qa-btn gestor" (click)="fillAndLogin('2002','gestor123')">
-                <span class="qa-icon">🏢</span>
-                <div><strong>Gestor</strong><small>gestor123</small></div>
-              </button>
-              <button id="btn-demo-admin" class="qa-btn admin" (click)="fillAndLogin('9001','admin123')">
-                <span class="qa-icon">⚙️</span>
-                <div><strong>Admin</strong><small>admin123</small></div>
-              </button>
-            </div>
-          </div>
 
           <!-- Guest Access Option -->
           <div class="guest-access">
             <a id="btn-guest-access" routerLink="/ecopoints" class="btn-guest">
-              🌿 Explorar la plataforma como Invitado
+              <i class="bi bi-eye me-2"></i>Explorar la plataforma como Invitado
             </a>
           </div>
 
@@ -150,9 +122,28 @@ import { AuthService } from '../../../core/services/auth.service';
       max-width: 400px;
     }
     .hero-logo {
-      font-size: 4rem;
-      margin-bottom: 16px;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+      margin-bottom: 24px;
+    }
+    .hero-logo-card {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      padding: 14px 22px;
+      border-radius: 18px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hero-logo-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+    .hero-logo-img {
+      width: 130px;
+      height: auto;
+      max-height: 110px;
+      object-fit: contain;
+      display: block;
     }
     .hero-content h1 {
       font-size: 3rem;
@@ -169,20 +160,8 @@ import { AuthService } from '../../../core/services/auth.service';
       font-size: 1.05rem;
       color: rgba(255,255,255,0.75);
       line-height: 1.7;
-      margin-bottom: 40px;
+      margin-bottom: 0;
     }
-    .hero-stats {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .hstat { display: flex; flex-direction: column; }
-    .hstat-val {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: #74c69d;
-    }
-    .hstat-lbl { font-size: 0.78rem; color: rgba(255,255,255,0.6); }
     .hero-decoration {
       position: absolute;
       bottom: -60px; right: -60px;
@@ -285,32 +264,6 @@ import { AuthService } from '../../../core/services/auth.service';
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Quick access */
-    .quick-access { margin-top: 24px; padding-top: 24px; border-top: 1px solid #f1f5f9; }
-    .qa-label { font-size: 0.75rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
-    .qa-btns { display: flex; gap: 8px; }
-    .qa-btn {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 10px;
-      border-radius: 10px;
-      border: 1.5px solid #e2e8f0;
-      background: #f8fafc;
-      cursor: pointer;
-      transition: all 0.18s;
-      font-family: inherit;
-      text-align: left;
-    }
-    .qa-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    .qa-btn.ciudadano:hover { background: #f0faf3; border-color: #95d5b2; }
-    .qa-btn.gestor:hover   { background: #f0f9ff; border-color: #7dd3fc; }
-    .qa-btn.admin:hover    { background: #fffbeb; border-color: #fcd34d; }
-    .qa-icon { font-size: 1.2rem; flex-shrink: 0; }
-    .qa-btn div { display: flex; flex-direction: column; gap: 1px; }
-    .qa-btn strong { font-size: 0.78rem; font-weight: 700; color: #334155; }
-    .qa-btn small { font-size: 0.68rem; color: #94a3b8; }
 
     /* Alert */
     .alert { padding: 11px 14px; border-radius: 8px; font-size: 0.88rem; font-weight: 500; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
@@ -351,7 +304,6 @@ import { AuthService } from '../../../core/services/auth.service';
       .auth-panel { width: 100%; padding: 24px 16px; }
     }
     @media (max-width: 580px) {
-      .qa-btns { flex-direction: column; }
       .auth-card { padding: 24px 18px; }
     }
   `]
@@ -372,10 +324,6 @@ export class LoginComponent {
 
   get f() { return this.loginForm.controls; }
 
-  fillAndLogin(user: string, pass: string): void {
-    this.loginForm.patchValue({ email: user, password: pass });
-    setTimeout(() => this.onSubmit(), 100);
-  }
 
   onSubmit(): void {
     if (this.loginForm.invalid) return;

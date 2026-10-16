@@ -12,12 +12,15 @@ import { AuthService } from '../../../../app/core/services/auth.service';
     <div class="auth-container">
       <div class="auth-card">
         <div class="auth-header">
-          <h2>📝 Registro de Ciudadano</h2>
+          <div class="auth-logo-center">
+            <img src="assets/logo.png" alt="EcoPuntos Pamplona" class="auth-logo-img">
+          </div>
+          <h2><i class="bi bi-person-plus-fill me-2"></i>Registro de Ciudadano</h2>
           <p>Únete a la comunidad ecológica de Pamplona</p>
         </div>
 
         <div *ngIf="errorMessage" class="alert-error">
-          ⚠️ {{ errorMessage }}
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
         </div>
 
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
@@ -74,7 +77,7 @@ import { AuthService } from '../../../../app/core/services/auth.service';
           </div>
 
           <button type="submit" class="btn-submit" [disabled]="registerForm.invalid || isLoading">
-            <span *ngIf="!isLoading">Crear mi Cuenta de Ciudadano</span>
+            <span *ngIf="!isLoading"><i class="bi bi-check2-circle me-2"></i>Crear mi Cuenta de Ciudadano</span>
             <span *ngIf="isLoading">Creando cuenta...</span>
           </button>
         </form>
@@ -104,6 +107,20 @@ import { AuthService } from '../../../../app/core/services/auth.service';
       max-width: 460px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
       border: 1px solid #e0e0e0;
+    }
+
+    .auth-logo-center {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .auth-logo-img {
+      width: 90px;
+      height: auto;
+      max-height: 80px;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08));
     }
 
     .auth-header h2 {

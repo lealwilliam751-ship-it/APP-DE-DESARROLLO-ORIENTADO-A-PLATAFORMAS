@@ -12,7 +12,7 @@ import QRCode from 'qrcode';
     <div class="page-container fade-in">
       <div class="qr-card card">
         <div class="card-header">
-          <h2>🪪 Carnet Digital EcoPuntos</h2>
+          <h2><i class="bi bi-qr-code-scan me-2"></i> Carnet Digital EcoPuntos</h2>
           <p>Presenta este código QR en cualquier EcoPunto de Pamplona para identificarte</p>
         </div>
 
@@ -22,7 +22,7 @@ import QRCode from 'qrcode';
         </div>
 
         <div *ngIf="errorMessage()" class="alert alert-error">
-          ⚠️ {{ errorMessage() }}
+           <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage() }}
         </div>
 
         <div *ngIf="!loading() && qrData() as data" class="card-body">
@@ -31,8 +31,8 @@ import QRCode from 'qrcode';
             <div class="user-info">
               <h3>{{ data.user.name }}</h3>
               <div class="badge-row">
-                <span class="user-level">🌱 {{ data.user.level || 'Semilla Verde' }}</span>
-                <span class="user-points">⭐ {{ data.user.total_points }} Puntos</span>
+                <span class="user-level"><i class="bi bi-award-fill text-success me-1"></i> {{ data.user.level || 'Semilla Verde' }}</span>
+                <span class="user-points"><i class="bi bi-star-fill text-warning me-1"></i> {{ data.user.total_points }} Puntos</span>
               </div>
             </div>
           </div>
@@ -53,10 +53,10 @@ import QRCode from 'qrcode';
 
           <div class="qr-actions">
             <button class="btn btn-secondary btn-sm" (click)="copyPayload(data.qr)">
-              📋 {{ copied() ? '¡Copiado!' : 'Copiar Código' }}
+               <i class="bi bi-copy me-1"></i> {{ copied() ? '¡Copiado!' : 'Copiar Código' }}
             </button>
             <button class="btn btn-primary btn-sm" (click)="downloadQRImage(data.user.name)">
-              💾 Guardar Imagen de Carnet
+               <i class="bi bi-download me-1"></i> Guardar Imagen de Carnet
             </button>
           </div>
 
@@ -66,12 +66,12 @@ import QRCode from 'qrcode';
           </div>
 
           <div class="instructions alert alert-warning mt-3">
-            📌 El Gestor de Punto escaneará este carnet (o la foto guardada) para verificar tu perfil y cargar tus entregas.
+             <i class="bi bi-info-circle-fill me-1"></i> El Gestor de Punto escaneará este carnet (o la foto guardada) para verificar tu perfil y cargar tus entregas.
           </div>
 
           <div class="citizen-quick-links mt-4">
             <a routerLink="/deliveries" class="btn btn-outline-primary btn-full">
-              📦 Realizar Pre-solicitud o Ver Mis Entregas →
+               <i class="bi bi-box-seam-fill me-1"></i> Realizar Pre-solicitud o Ver Mis Entregas →
             </a>
           </div>
         </div>

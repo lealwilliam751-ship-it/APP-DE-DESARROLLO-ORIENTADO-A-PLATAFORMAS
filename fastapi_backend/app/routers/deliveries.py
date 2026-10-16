@@ -52,17 +52,23 @@ def create_delivery(
     ecopoint_id = data.get_ecopoint_id()
     
     # If a gestor or admin is creating the delivery on behalf of a citizen:
-    target_user_id = current_user.id
     provided_citizen_id = data.get_citizen_id()
-    if provided_citizen_id and current_user.role in [UserRole.Gestor_de_Punto, UserRole.Administrador]:
+    if current_user.role in [UserRole.Gestor_de_Punto, UserRole.Administrador]:
+        if not provided_citizen_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Los gestores no pueden registrar ni aprobar una entrega sin identificar claramente al ciudadano destinatario."
+            )
         citizen = db.query(User).filter(User.id == provided_citizen_id).first()
         if not citizen:
             raise HTTPException(status_code=404, detail="El ciudadano especificado no existe.")
         if citizen.role != UserRole.Ciudadano:
             raise HTTPException(status_code=400, detail="Solo se pueden registrar entregas a usuarios con rol Ciudadano.")
         target_user_id = citizen.id
+    else:
+        target_user_id = current_user.id
 
-    # Determine initial status: if Gestor/Admin creates delivery in person, auto-approve immediately
+    # Determine initial status: if Gestor/Admin creates delivery in person with identified citizen, auto-approve immediately
     initial_status = DeliveryStatus.pending
     if current_user.role in [UserRole.Gestor_de_Punto, UserRole.Administrador] and (data.auto_approve is None or data.auto_approve is True):
         initial_status = DeliveryStatus.approved
@@ -134,22 +140,32 @@ def approve_delivery(
     if delivery.status != DeliveryStatus.pending:
         raise HTTPException(status_code=400, detail="Solo se pueden aprobar entregas en estado pendiente.")
 
+    user = db.query(User).filter(User.id == delivery.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="El ciudadano asociado a esta entrega no existe.")
+    if user.role != UserRole.Ciudadano:
+        raise HTTPException(status_code=400, detail="Solo se pueden aprobar entregas dirigidas a un usuario con rol Ciudadano.")
+
     try:
         delivery.status = DeliveryStatus.approved
-        
-        user = db.query(User).filter(User.id == delivery.user_id).first()
-        if user:
-            user.total_points += delivery.total_points
-            user.level = calculate_level(user.total_points)
+        user.total_points += delivery.total_points
+        user.level = calculate_level(user.total_points)
 
         db.commit()
         db.refresh(delivery)
 
         delivery_out = DeliveryOut.model_validate(delivery).model_dump()
+        delivery_out["citizen_name"] = user.name
         return {
             "result": {
                 "addedPoints": delivery.total_points,
-                "status": "approved"
+                "status": "approved",
+                "citizen": {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email,
+                    "new_points": user.total_points
+                }
             },
             "delivery": delivery_out
         }

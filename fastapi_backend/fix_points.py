@@ -23,14 +23,14 @@ PUNTOS_REALES_PAMPLONA = [
     },
     {
         "name": "Punto Limpio Empopamplona S.A. E.S.P.",
-        "address": "Carrera 6 N° 4-65, Barrio Centro",
+        "address": "Carrera 6 N 4-65, Barrio Centro",
         "city": "Pamplona",
         "lat": 7.3758,
         "lng": -72.6483
     },
     {
         "name": "Asociación Ecología y Paz",
-        "address": "Carrera 8 N° 2-10, Barrio Centro",
+        "address": "Carrera 8 N 2-10, Barrio Centro",
         "city": "Pamplona",
         "lat": 7.3770,
         "lng": -72.6490

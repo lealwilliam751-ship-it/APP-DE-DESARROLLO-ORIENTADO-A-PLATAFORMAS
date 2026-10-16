@@ -40,64 +40,64 @@
 
 ```
 +----------------------------+      HTTP/REST (Puerto 4200)
-|   Angular 22 (Frontend)    | ─────────────────────────────────────────┐
-|   Standalone Components    |                                           │
-|   TypeScript + RxJS        |                                           ▼
-|   ReactiveForms + Guards   |      +----------------------------------+ │
-|   HTTP Interceptors        | ────►|  FastAPI 0.142 (Backend REST)    | │
-+----------------------------+      |  Python 3.13 + Uvicorn           | │
-                                    |  Pydantic v2 + SQLAlchemy 2.1    | │
-                                    |  JWT (python-jose) + bcrypt       | │
-                                    |  Puerto: 3000                    | │
-                                    |  Swagger UI: /docs               | │
-                                    +----------------------------------+ │
-                                                    │                    │
-                                                    ▼                    │
-                                    +----------------------------------+ │
-                                    |  PostgreSQL 15 + PostGIS 3.3    | │
-                                    |  (Docker, Puerto 5432)          | │
-                                    |  10 tablas normalizadas         | │
-                                    |  Índice espacial GIST           | │
-                                    +----------------------------------+ │
+| Angular 22 (Frontend) | 
+| Standalone Components | 
+| TypeScript + RxJS | 
+| ReactiveForms + Guards | +----------------------------------+ 
+| HTTP Interceptors | | FastAPI 0.142 (Backend REST) | 
++----------------------------+ | Python 3.13 + Uvicorn | 
+                                    | Pydantic v2 + SQLAlchemy 2.1 | 
+                                    | JWT (python-jose) + bcrypt | 
+                                    | Puerto: 3000 | 
+                                    | Swagger UI: /docs | 
+                                    +----------------------------------+ 
+                                                     
+                                                     
+                                    +----------------------------------+ 
+                                    | PostgreSQL 15 + PostGIS 3.3 | 
+                                    | (Docker, Puerto 5432) | 
+                                    | 10 tablas normalizadas | 
+                                    | Índice espacial GIST | 
+                                    +----------------------------------+ 
 ```
 
 ### 4.2. Estructura de Directorios
 
 ```
 PROYECTO ECOPUNTOS PAMPLONA/
-├── frontend/                        ← Angular 22
-│   └── src/app/
-│       ├── core/
-│       │   ├── models/              ← Interfaces TypeScript
-│       │   ├── services/            ← AuthService, DeliveryService, etc.
-│       │   ├── interceptors/        ← AuthInterceptor (JWT), ErrorInterceptor
-│       │   └── guards/              ← AuthGuard, RoleGuard
-│       ├── shared/                  ← NavbarComponent, componentes reutilizables
-│       └── features/
-│           ├── auth/                ← LoginComponent, RegisterComponent
-│           ├── dashboard/           ← Panel por rol (Ciudadano/Gestor/Admin)
-│           ├── ecopoints/           ← Lista de ecopuntos
-│           ├── deliveries/          ← Formulario ReactiveForm con FormArray
-│           ├── rewards/             ← Catálogo y canje de premios
-│           └── ranking/             ← Tabla de clasificación
-├── fastapi_backend/                 ← FastAPI + SQLAlchemy
-│   ├── app/
-│   │   ├── main.py                  ← App, CORS, routers registrados
-│   │   ├── config.py                ← Pydantic Settings (.env)
-│   │   ├── database.py              ← SQLAlchemy engine + SessionLocal
-│   │   ├── security.py              ← bcrypt, JWT, get_current_user, require_roles
-│   │   ├── models/models.py         ← ORM SQLAlchemy (10 tablas)
-│   │   ├── schemas/schemas.py       ← Pydantic v2 In/Out schemas
-│   │   └── routers/                 ← auth, ecopoints, materials, deliveries,
-│   │       │                           rewards, ranking, admin, qr
-│   ├── tests/
-│   │   ├── test_api.py              ← Pruebas básicas (health, auth, endpoints)
-│   │   └── test_system.py           ← Suite integral de 8 flujos del sistema
-│   └── seed.py                      ← Semilla de datos iniciales
-├── backend/                         ← Sistema original Express (referencia)
-│   └── migrations/                  ← Esquema SQL original (reutilizado)
-├── docker-compose.yml               ← PostgreSQL 15 + PostGIS + pgAdmin
-└── README.md                        ← Guía de ejecución local completa
+ frontend/ ← Angular 22
+ src/app/
+ core/
+ models/ ← Interfaces TypeScript
+ services/ ← AuthService, DeliveryService, etc.
+ interceptors/ ← AuthInterceptor (JWT), ErrorInterceptor
+ guards/ ← AuthGuard, RoleGuard
+ shared/ ← NavbarComponent, componentes reutilizables
+ features/
+ auth/ ← LoginComponent, RegisterComponent
+ dashboard/ ← Panel por rol (Ciudadano/Gestor/Admin)
+ ecopoints/ ← Lista de ecopuntos
+ deliveries/ ← Formulario ReactiveForm con FormArray
+ rewards/ ← Catálogo y canje de premios
+ ranking/ ← Tabla de clasificación
+ fastapi_backend/ ← FastAPI + SQLAlchemy
+ app/
+ main.py ← App, CORS, routers registrados
+ config.py ← Pydantic Settings (.env)
+ database.py ← SQLAlchemy engine + SessionLocal
+ security.py ← bcrypt, JWT, get_current_user, require_roles
+ models/models.py ← ORM SQLAlchemy (10 tablas)
+ schemas/schemas.py ← Pydantic v2 In/Out schemas
+ routers/ ← auth, ecopoints, materials, deliveries,
+ rewards, ranking, admin, qr
+ tests/
+ test_api.py ← Pruebas básicas (health, auth, endpoints)
+ test_system.py ← Suite integral de 8 flujos del sistema
+ seed.py ← Semilla de datos iniciales
+ backend/ ← Sistema original Express (referencia)
+ migrations/ ← Esquema SQL original (reutilizado)
+ docker-compose.yml ← PostgreSQL 15 + PostGIS + pgAdmin
+ README.md ← Guía de ejecución local completa
 ```
 
 ---
@@ -128,7 +128,7 @@ notifications (id PK, user_id FK→users, title, message, is_read BOOL, created_
 
 ### Relaciones Clave
 - **1..N:** `users → deliveries`, `ecopoints → deliveries`, `deliveries → delivery_items`, `materials → delivery_items`, `users → redeemed_rewards`, `users → notifications`
-- **N..N:** `campaigns ↔ users` a través de `campaign_participants`
+- **N..N:** `campaigns users` a través de `campaign_participants`
 
 ---
 
@@ -200,16 +200,16 @@ notifications (id PK, user_id FK→users, title, message, is_read BOOL, created_
 
 | Fase | Nombre | Estado | Descripción |
 |---|---|---|---|
-| 0 | Definición y diseño | ✅ Completo | Requisitos, roles, modelo relacional y arquitectura |
-| 1 | Base del sistema y autenticación | ✅ Completo | Docker, BD PostgreSQL, FastAPI JWT y register/login |
-| 2 | Catálogos base y geolocalización | ✅ Completo | Ecopuntos con Haversine, catálogo de materiales |
-| 3 | Entregas, QR y motor de puntos | ✅ Completo | Entrega con FormArray, aprobación con transacción ACID |
-| 4 | Recompensas y cupones | ✅ Completo | Canje con validación ACID, código único ECO-XXXXXX |
-| 5 | Angular — Componentes y Rutas | ✅ Completo | Todos los componentes Standalone, Guards, Interceptores |
-| 6 | Ranking y panel ejecutivo | ✅ Completo | Leaderboard, posición personal, métricas de Admin |
-| 7 | Pruebas automatizadas | ✅ Completo | Suite pytest: 4 tests (3 unitarios + 1 integral de 8 flujos) |
-| 8 | Documentación oficial | ✅ Completo | ERD, Normalización, Mockups, Guía de Sustentación, README |
-| 9 | Despliegue en nube | ⏳ Opcional | +5 pts bonus (Vercel + Render + Supabase/Neon) |
+| 0 | Definición y diseño | Completo | Requisitos, roles, modelo relacional y arquitectura |
+| 1 | Base del sistema y autenticación | Completo | Docker, BD PostgreSQL, FastAPI JWT y register/login |
+| 2 | Catálogos base y geolocalización | Completo | Ecopuntos con Haversine, catálogo de materiales |
+| 3 | Entregas, QR y motor de puntos | Completo | Entrega con FormArray, aprobación con transacción ACID |
+| 4 | Recompensas y cupones | Completo | Canje con validación ACID, código único ECO-XXXXXX |
+| 5 | Angular — Componentes y Rutas | Completo | Todos los componentes Standalone, Guards, Interceptores |
+| 6 | Ranking y panel ejecutivo | Completo | Leaderboard, posición personal, métricas de Admin |
+| 7 | Pruebas automatizadas | Completo | Suite pytest: 4 tests (3 unitarios + 1 integral de 8 flujos) |
+| 8 | Documentación oficial | Completo | ERD, Normalización, Mockups, Guía de Sustentación, README |
+| 9 | Despliegue en nube | Opcional | +5 pts bonus (Vercel + Render + Supabase/Neon) |
 
 ---
 

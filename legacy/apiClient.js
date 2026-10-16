@@ -68,7 +68,7 @@ function normalizeEcopoint(ep) {
   };
 }
 
-// ─── API CLIENT ───────────────────────────────────────────────────────────────
+// API CLIENT 
 
 const apiClient = {
 

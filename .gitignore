@@ -3,14 +3,14 @@
 # Angular 22 + FastAPI 0.142 + PostgreSQL 15
 # ============================================================
 
-# ── Environment & Credentials (NUNCA en Git) ────────────────
+# Environment & Credentials (NUNCA en Git) 
 .env
 .env.*
 !.env.example
 backend/.env
 fastapi_backend/.env
 
-# ── Node.js / Angular ────────────────────────────────────────
+# Node.js / Angular 
 node_modules/
 backend/node_modules/
 frontend/node_modules/
@@ -19,7 +19,7 @@ frontend/dist/
 frontend/.cache/
 .npm/
 
-# ── Python / FastAPI / pytest ─────────────────────────────────
+# Python / FastAPI / pytest 
 __pycache__/
 **/__pycache__/
 *.py[cod]
@@ -47,12 +47,12 @@ fastapi_backend/coverage.xml
 .mypy_cache/
 .ruff_cache/
 
-# ── Docker ────────────────────────────────────────────────────
+# Docker 
 # (docker-compose.yml SÍ se sube — solo volúmenes locales se ignoran)
 docker-volumes/
 pgdata/
 
-# ── OS & IDE ──────────────────────────────────────────────────
+# OS & IDE 
 .DS_Store
 Thumbs.db
 Desktop.ini
@@ -62,7 +62,7 @@ Desktop.ini
 *.swo
 *~
 
-# ── Logs & Temporales ─────────────────────────────────────────
+# Logs & Temporales 
 *.db
 *.log
 npm-debug.log*
@@ -73,7 +73,8 @@ yarn-error.log*
 .system_generated/
 scratch/
 
-# ── Guía local de sustentación (NO subir a GitHub) ──────────
+# Guía local de sustentación (NO subir a GitHub) 
 Guia_Sustentacion_Defensa_EcoPuntos.md
 docs/Guia_Sustentacion_Defensa_EcoPuntos.md
+aplicacion explicacion completa/
 

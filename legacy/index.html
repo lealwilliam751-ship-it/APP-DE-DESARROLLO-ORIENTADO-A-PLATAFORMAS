@@ -15,8 +15,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- FontAwesome Icons -->
+  <!-- FontAwesome Icons & Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
   <!-- Leaflet.js — Mapa Real con GPS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -242,7 +243,7 @@
     <!-- ÁREA PRINCIPAL DE CONTENIDO MÓVIL -->
     <main class="main-content">
 
-      <!-- ── PESTAÑA 1: INICIO Y DASHBOARD ── -->
+      <!-- PESTAÑA 1: INICIO Y DASHBOARD -->
       <section id="tabHome" class="tab-pane active">
         <!-- Banner dinámico por rol -->
         <div id="roleBannerSection"></div>
@@ -323,7 +324,7 @@
         <div class="recent-deliveries-list" id="recentDeliveriesList"></div>
       </section>
 
-      <!-- ── PESTAÑA 2: PUNTOS ECOLÓGICOS CON MAPA LEAFLET ── -->
+      <!-- PESTAÑA 2: PUNTOS ECOLÓGICOS CON MAPA LEAFLET -->
       <section id="tabPoints" class="tab-pane">
         <div class="tab-header">
           <h2> Puntos de Reciclaje</h2>
@@ -365,7 +366,7 @@
         <div class="points-cards-list" id="pointsCardsList"></div>
       </section>
 
-      <!-- ── PESTAÑA 3: ENTREGAS Y ESCÁNER QR ── -->
+      <!-- PESTAÑA 3: ENTREGAS Y ESCÁNER QR -->
       <section id="tabDeliveries" class="tab-pane">
         <div class="tab-header">
           <h2> Registro de Entregas</h2>
@@ -417,7 +418,7 @@
         <div class="deliveries-full-list" id="deliveriesFullList"></div>
       </section>
 
-      <!-- ── PESTAÑA 4: RECOMPENSAS Y CANJE ── -->
+      <!-- PESTAÑA 4: RECOMPENSAS Y CANJE -->
       <section id="tabRewards" class="tab-pane">
         <div class="tab-header">
           <h2> Catálogo de Recompensas</h2>
@@ -461,11 +462,11 @@
         <div class="my-vouchers-slider" id="myVouchersSlider"></div>
 
         <!-- Catálogo -->
-        <div class="section-title"><span>⭐ Recompensas Disponibles</span></div>
+        <div class="section-title"><span> Recompensas Disponibles</span></div>
         <div class="rewards-grid" id="rewardsGrid"></div>
       </section>
 
-      <!-- ── PESTAÑA 5: CAMPAÑAS Y RANKING ── -->
+      <!-- PESTAÑA 5: CAMPAÑAS Y RANKING -->
       <section id="tabCampaigns" class="tab-pane">
         <div class="tab-header">
           <h2> Campañas y Ranking</h2>
@@ -497,7 +498,7 @@
         </div>
       </section>
 
-      <!-- ── PESTAÑA 6: PANEL ADMINISTRADOR ── -->
+      <!-- PESTAÑA 6: PANEL ADMINISTRADOR -->
       <section id="tabAdmin" class="tab-pane admin-only-section">
         <div class="tab-header">
           <h2> Panel de Administración</h2>
@@ -536,7 +537,7 @@
 
         <!-- Gestión de Entregas Pendientes (Aprobación Admin) -->
         <div class="section-title">
-          <span>⏳ Entregas Pendientes de Aprobación</span>
+          <span> Entregas Pendientes de Aprobación</span>
           <span id="pendingCountBadge" class="count-badge">0</span>
         </div>
         <div id="adminPendingList" class="admin-pending-list"></div>
@@ -605,9 +606,9 @@
   </div><!-- fin #app -->
 
 
-  <!-- ════════════════════════════════
+  <!-- 
        MODALES
-       ════════════════════════════════ -->
+        -->
 
   <!-- MODAL: Nueva Entrega -->
   <div id="deliveryModal" class="modal-backdrop">

@@ -42,7 +42,10 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
         doc_map = {
             "9001": "admin@ecopuntos.com",
             "2002": "gestor@ecopuntos.com",
-            "1001": "1001@ecopuntos.com",
+            "1001": "ana@ecopuntos.com",
+            "admin": "admin@ecopuntos.com",
+            "gestor": "gestor@ecopuntos.com",
+            "ana": "ana@ecopuntos.com",
         }
         if clean_email in doc_map:
             user = db.query(User).filter(User.email == doc_map[clean_email]).first()

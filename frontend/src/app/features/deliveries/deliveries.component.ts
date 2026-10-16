@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DeliveryService } from '../../core/services/delivery.service';
 import { EcoPointService } from '../../core/services/ecopoint.service';
@@ -15,38 +15,100 @@ import { User } from '../../core/models/user.model';
 @Component({
   selector: 'app-deliveries',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   template: `
     <div class="page-container fade-in">
-      
-      <!-- GESTOR BANNER: Scanning Citizen Context -->
-      <div *ngIf="isGestorOrAdmin() && targetCitizen() as citizen" class="citizen-banner card mb-6 fade-in">
-        <div class="cb-content">
-          <div class="cb-avatar">{{ citizen.name.charAt(0).toUpperCase() }}</div>
-          <div class="cb-details">
-            <span class="cb-tag">👤 Registrando Entrega Presencial para:</span>
-            <h3 class="cb-name">{{ citizen.name }} <span class="cb-id">#{{ citizen.id }}</span></h3>
-            <div class="cb-meta">
-              <span>📧 {{ citizen.email }}</span> • 
-              <span>🌱 {{ citizen.level || 'Semilla Verde' }}</span> • 
-              <strong style="color: #b45309">⭐ {{ citizen.total_points }} Puntos</strong>
+
+      <!-- GESTOR: Selección obligatoria de ciudadano -->
+      <ng-container *ngIf="isGestorOrAdmin()">
+
+        <!-- Sin ciudadano: mostrar buscador -->
+        <div *ngIf="!targetCitizen()" class="citizen-picker card mb-6 fade-in">
+          <div class="cp-header">
+            <div class="cp-icon"><i class="bi bi-person-badge-fill"></i></div>
+            <div>
+              <h2 class="cp-title">Identificar Ciudadano</h2>
+              <p class="cp-sub">Antes de registrar una entrega debe identificar al ciudadano. Busca por nombre, correo o ID, o escanea su carnet QR.</p>
             </div>
           </div>
-          <button class="btn btn-sm btn-secondary" (click)="clearSelectedCitizen()">
-            ✕ Cambiar Ciudadano
-          </button>
-        </div>
-      </div>
 
-      <!-- SECTION 1: Form Card -->
-      <div class="form-card card mb-6">
+          <div class="cp-search-row">
+            <input
+              id="citizen-search-input"
+              class="form-control"
+              type="text"
+              [(ngModel)]="citizenSearchQuery"
+              (input)="onCitizenSearch()"
+              placeholder="Buscar ciudadano por nombre, correo o ID..."
+              autocomplete="off"
+            />
+            <a routerLink="/gestor/scan" class="btn btn-secondary">
+              <i class="bi bi-qr-code-scan me-1"></i> Escanear QR
+            </a>
+          </div>
+
+          <div class="cp-loading" *ngIf="searchingCitizens()">
+            <span class="dot-spinner"></span> Buscando...
+          </div>
+
+          <div class="cp-results" *ngIf="!searchingCitizens() && citizenResults().length > 0">
+            <div
+              *ngFor="let c of citizenResults()"
+              class="cp-result-item"
+              (click)="selectCitizen(c)"
+            >
+              <div class="cp-res-avatar">{{ c.name.charAt(0).toUpperCase() }}</div>
+              <div class="cp-res-info">
+                <strong>{{ c.name }}</strong>
+                <small>{{ c.email }} · #{{ c.id }}</small>
+              </div>
+              <div class="cp-res-pts">
+                <i class="bi bi-star-fill text-warning me-1"></i>
+                {{ c.total_points }} pts
+              </div>
+              <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+          </div>
+
+          <div class="cp-empty" *ngIf="!searchingCitizens() && citizenSearchQuery.length >= 2 && citizenResults().length === 0">
+            <i class="bi bi-person-x-fill me-1"></i> No se encontraron ciudadanos con ese criterio.
+          </div>
+
+          <div class="cp-hint" *ngIf="citizenSearchQuery.length < 2 && !searchingCitizens()">
+            <i class="bi bi-info-circle me-1"></i> Escribe al menos 2 caracteres para buscar o escanea el carnet QR del ciudadano.
+          </div>
+        </div>
+
+        <!-- Con ciudadano: mostrar banner -->
+        <div *ngIf="targetCitizen() as citizen" class="citizen-banner card mb-6 fade-in">
+          <div class="cb-content">
+            <div class="cb-avatar">{{ citizen.name.charAt(0).toUpperCase() }}</div>
+            <div class="cb-details">
+              <span class="cb-tag"><i class="bi bi-person-check-fill text-success"></i> Ciudadano identificado — registrando entrega para:</span>
+              <h3 class="cb-name">{{ citizen.name }} <span class="cb-id">#{{ citizen.id }}</span></h3>
+              <div class="cb-meta">
+                <span><i class="bi bi-envelope-fill text-muted me-1"></i> {{ citizen.email }}</span> •
+                <span><i class="bi bi-award-fill text-success me-1"></i> {{ citizen.level || 'Semilla Verde' }}</span> •
+                <strong style="color: #b45309"><i class="bi bi-star-fill text-warning me-1"></i> {{ citizen.total_points }} Puntos</strong>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-secondary" (click)="clearSelectedCitizen()">
+              <i class="bi bi-arrow-left-right me-1"></i> Cambiar Ciudadano
+            </button>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- SECTION 1: Form Card (solo visible si no es gestor O si es gestor y tiene ciudadano) -->
+      <div class="form-card card mb-6" *ngIf="!isGestorOrAdmin() || targetCitizen()">
         <div class="fc-header" [class.gestor-header]="isGestorOrAdmin()">
           <h2>
-            <ng-container *ngIf="isGestorOrAdmin()">⚖️ Registrar y Pesarlo en Báscula (Aprobación Inmediata)</ng-container>
-            <ng-container *ngIf="!isGestorOrAdmin()">📋 Ticket de Pre-solicitud de Entrega (Opcional)</ng-container>
+            <ng-container *ngIf="isGestorOrAdmin()"><i class="bi bi-speedometer2 me-1"></i> Registrar y Pesar en Báscula (Aprobación Inmediata)</ng-container>
+            <ng-container *ngIf="!isGestorOrAdmin()"><i class="bi bi-ticket-perforated-fill me-1"></i> Ticket de Pre-solicitud de Entrega (Opcional)</ng-container>
           </h2>
           <p *ngIf="isGestorOrAdmin()">
-            Ingresa los kilos pesados en la báscula física. Al presionar Aprobar, los EcoPuntos se acreditarán al instante.
+            Ingresa los kilos pesados en la báscula física. Al presionar Aprobar, los EcoPuntos se acreditarán al instante al ciudadano identificado.
           </p>
           <p *ngIf="!isGestorOrAdmin()">
             Agiliza tu visita seleccionando el EcoPunto y estimando tus residuos para generar tu ticket de entrega.
@@ -54,29 +116,29 @@ import { User } from '../../core/models/user.model';
         </div>
 
         <div class="alert alert-success" *ngIf="successMessage()">
-          ✅ {{ successMessage() }}
+           <i class="bi bi-check-circle-fill me-1"></i> {{ successMessage() }}
         </div>
         <div class="alert alert-error" *ngIf="errorMessage()">
-          ⚠️ {{ errorMessage() }}
+           <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage() }}
         </div>
 
         <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()">
           <!-- EcoPoint Selection -->
           <div class="form-group">
-            <label class="form-label" for="ecopoint_id">📍 Seleccionar EcoPunto de Acopio *</label>
+            <label class="form-label" for="ecopoint_id"><i class="bi bi-geo-alt-fill text-muted me-1"></i> Seleccionar EcoPunto de Acopio *</label>
             <select id="ecopoint_id" formControlName="ecopoint_id" class="form-control">
               <option [value]="null" disabled>-- Selecciona un EcoPunto --</option>
               <option *ngFor="let ep of ecopoints()" [value]="ep.id">
-                📍 {{ ep.name }} ({{ ep.address }})
+                 {{ ep.name }} ({{ ep.address }})
               </option>
             </select>
           </div>
 
           <!-- Materials Section -->
           <div class="items-section-header">
-            <h4>♻️ Materiales a Registrar *</h4>
+            <h4><i class="bi bi-recycle text-success me-1"></i> Materiales a Registrar *</h4>
             <button type="button" class="btn btn-primary btn-sm" (click)="addItem()">
-              + Agregar Otro Material
+              <i class="bi bi-plus-lg"></i> Agregar Otro Material
             </button>
           </div>
 
@@ -98,20 +160,20 @@ import { User } from '../../core/models/user.model';
               </div>
 
               <button type="button" class="btn-remove" (click)="removeItem(i)" *ngIf="items.length > 1" title="Eliminar material">
-                🗑️
+                <i class="bi bi-trash-fill"></i>
               </button>
             </div>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" class="submit-btn btn-full mt-4" [class.gestor-submit]="isGestorOrAdmin()" [disabled]="deliveryForm.invalid || isLoading()">
+          <button type="submit" class="submit-btn btn-full mt-4" [class.gestor-submit]="isGestorOrAdmin()" [disabled]="deliveryForm.invalid || isLoading() || (isGestorOrAdmin() && !targetCitizen())">
             <ng-container *ngIf="isGestorOrAdmin()">
-              <span *ngIf="!isLoading()">✅ Aprobar Entrega y Acreditar Puntos de Inmediato</span>
+              <span *ngIf="!isLoading()"><i class="bi bi-check-circle-fill me-1"></i> Aprobar Entrega y Acreditar Puntos de Inmediato</span>
               <span *ngIf="isLoading()">Procesando pesaje y acreditando...</span>
             </ng-container>
 
             <ng-container *ngIf="!isGestorOrAdmin()">
-              <span *ngIf="!isLoading()">🚀 Crear Ticket de Pre-solicitud (⏳ Pendiente)</span>
+              <span *ngIf="!isLoading()"><i class="bi bi-send-fill me-1"></i> Crear Ticket de Pre-solicitud (Pendiente)</span>
               <span *ngIf="isLoading()">Generando ticket...</span>
             </ng-container>
           </button>
@@ -122,20 +184,20 @@ import { User } from '../../core/models/user.model';
       <div class="card mb-6" *ngIf="isGestorOrAdmin()">
         <div class="section-header mb-4">
           <div>
-            <h3 class="section-title">📥 Bandeja de Entregas Pendientes (Pre-solicitudes)</h3>
+            <h3 class="section-title"><i class="bi bi-inbox-fill text-primary me-1"></i> Bandeja de Entregas Pendientes (Pre-solicitudes)</h3>
             <p style="color: #64748b; font-size: 0.88rem; margin-top: 2px;">
               Entregas pre-solicitadas por ciudadanos que requieren verificación y pesaje presencial
             </p>
           </div>
           <button class="btn btn-sm btn-secondary" (click)="loadPendingDeliveries()">
-            🔄 Actualizar Bandeja
+             <i class="bi bi-arrow-clockwise"></i> Actualizar Bandeja
           </button>
         </div>
 
         <div class="spinner" *ngIf="loadingPending()"></div>
 
         <div class="empty-state" *ngIf="!loadingPending() && pendingDeliveries().length === 0">
-          <div class="empty-icon">✅</div>
+          <div class="empty-icon"><i class="bi bi-check-circle-fill text-success"></i></div>
           <p>No hay pre-solicitudes pendientes por validar en este momento.</p>
         </div>
 
@@ -157,15 +219,15 @@ import { User } from '../../core/models/user.model';
                   <strong>{{ d.citizen_name || 'Ciudadano' }}</strong>
                   <div style="font-size: 0.78rem; color: #64748b;">Usuario ID: #{{ d.user_id }}</div>
                 </td>
-                <td>📍 {{ d.ecopoint_name || 'EcoPunto Pamplona' }}</td>
-                <td><strong style="color: #2d6a4f">+{{ d.total_points }} pts</strong> (🌱 {{ d.total_co2 }} kg CO₂)</td>
+                <td><i class="bi bi-geo-alt-fill text-muted me-1"></i> {{ d.ecopoint_name || 'EcoPunto Pamplona' }}</td>
+                <td><strong style="color: #2d6a4f">+{{ d.total_points }} pts</strong> (<i class="bi bi-leaf-fill text-success me-1"></i> {{ d.total_co2 }} kg CO₂)</td>
                 <td>
                   <div class="action-buttons">
                     <button class="btn btn-sm btn-success" (click)="approveDelivery(d.id)" [disabled]="processingAction() === d.id">
-                      {{ processingAction() === d.id ? 'Aprobando...' : '✅ Aprobar Pesaje' }}
+                      <i class="bi bi-check-lg"></i> {{ processingAction() === d.id ? 'Aprobando...' : 'Aprobar Pesaje' }}
                     </button>
                     <button class="btn btn-sm btn-danger" (click)="rejectDelivery(d.id)" [disabled]="processingAction() === d.id">
-                      ❌ Rechazar
+                       <i class="bi bi-x-lg"></i> Rechazar
                     </button>
                   </div>
                 </td>
@@ -179,20 +241,20 @@ import { User } from '../../core/models/user.model';
       <div class="card" *ngIf="authService.currentUser()?.role === 'Ciudadano'">
         <div class="section-header mb-4">
           <div>
-            <h3 class="section-title">📜 Mis Entregas y Puntos Acumulados</h3>
+            <h3 class="section-title"><i class="bi bi-journal-text text-success me-1"></i> Mis Entregas y Puntos Acumulados</h3>
             <p style="color: #64748b; font-size: 0.88rem; margin-top: 2px;">
               Historial de tus entregas y estado de aprobación en los EcoPuntos
             </p>
           </div>
           <button class="btn btn-sm btn-secondary" (click)="loadMyDeliveries()">
-            🔄 Actualizar Estado
+             <i class="bi bi-arrow-clockwise"></i> Actualizar Estado
           </button>
         </div>
 
         <div class="spinner" *ngIf="loadingDeliveries()"></div>
 
         <div class="empty-state" *ngIf="!loadingDeliveries() && myDeliveries().length === 0">
-          <div class="empty-icon">📦</div>
+          <div class="empty-icon"><i class="bi bi-box-seam text-muted"></i></div>
           <p>Aún no tienes entregas registradas. Presenta tu Carnet QR en un EcoPunto o realiza una pre-solicitud arriba.</p>
         </div>
 
@@ -211,9 +273,9 @@ import { User } from '../../core/models/user.model';
             <tbody>
               <tr *ngFor="let d of myDeliveries()">
                 <td><span class="id-badge">#{{ d.id }}</span></td>
-                <td>📍 <strong>{{ d.ecopoint_name || 'EcoPunto Pamplona' }}</strong></td>
+                <td><i class="bi bi-geo-alt-fill text-muted me-1"></i> <strong>{{ d.ecopoint_name || 'EcoPunto Pamplona' }}</strong></td>
                 <td><strong style="color: #2d6a4f">+{{ d.total_points }} pts</strong></td>
-                <td>🌱 {{ d.total_co2 }} kg</td>
+                <td><i class="bi bi-leaf-fill text-success me-1"></i> {{ d.total_co2 }} kg</td>
                 <td>
                   <span class="pill" [ngClass]="statusClass(d.status)">
                     {{ statusLabel(d.status) }}
@@ -229,10 +291,43 @@ import { User } from '../../core/models/user.model';
     </div>
   `,
   styles: [`
+    /* Citizen Picker */
+    .citizen-picker { max-width: 760px; margin: 0 auto; padding: 24px 28px; }
+    .cp-header { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+    .cp-icon { font-size: 2.2rem; color: #2d6a4f; flex-shrink: 0; margin-top: 2px; }
+    .cp-title { font-size: 1.25rem; font-weight: 800; color: #1b4332; margin: 0 0 4px 0; }
+    .cp-sub { font-size: 0.9rem; color: #64748b; margin: 0; }
+    .cp-search-row { display: flex; gap: 10px; margin-bottom: 14px; }
+    .cp-search-row .form-control { flex: 1; }
+    .cp-loading { color: #64748b; font-size: 0.9rem; padding: 8px 0; display: flex; align-items: center; gap: 8px; }
+    .cp-results { border: 1.5px solid #e2e8f0; border-radius: 10px; overflow: hidden; margin-top: 4px; }
+    .cp-result-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; cursor: pointer;
+      transition: background 0.15s;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .cp-result-item:last-child { border-bottom: none; }
+    .cp-result-item:hover { background: #f0faf3; }
+    .cp-res-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #1b4332; color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; flex-shrink: 0;
+    }
+    .cp-res-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .cp-res-info strong { font-size: 0.92rem; color: #1e293b; }
+    .cp-res-info small { font-size: 0.78rem; color: #64748b; }
+    .cp-res-pts { font-size: 0.85rem; font-weight: 700; color: #b45309; white-space: nowrap; }
+    .cp-empty { color: #94a3b8; font-size: 0.88rem; padding: 12px 4px; display: flex; align-items: center; gap: 6px; }
+    .cp-hint { color: #94a3b8; font-size: 0.85rem; padding: 10px 4px; display: flex; align-items: center; gap: 6px; }
+
+    /* Citizen Banner */
     .citizen-banner {
       background: linear-gradient(135deg, #e8f5e9 0%, #d8f3dc 100%);
       border: 2px solid #52b788;
       padding: 16px 20px;
+      max-width: 760px; margin: 0 auto;
     }
     .cb-content {
       display: flex;
@@ -357,6 +452,10 @@ export class DeliveriesComponent implements OnInit {
   myDeliveries = signal<Delivery[]>([]);
   pendingDeliveries = signal<Delivery[]>([]);
   targetCitizen = signal<User | null>(null);
+  citizenResults = signal<User[]>([]);
+  searchingCitizens = signal<boolean>(false);
+  citizenSearchQuery = '';
+  private searchTimer: any = null;
 
   isLoading = signal<boolean>(false);
   loadingDeliveries = signal<boolean>(false);
@@ -434,7 +533,43 @@ export class DeliveriesComponent implements OnInit {
 
   clearSelectedCitizen(): void {
     this.targetCitizen.set(null);
+    this.citizenResults.set([]);
+    this.citizenSearchQuery = '';
     this.router.navigate([], { queryParams: { citizenId: null }, queryParamsHandling: 'merge' });
+  }
+
+  onCitizenSearch(): void {
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    const q = this.citizenSearchQuery.trim();
+    if (q.length < 2) {
+      this.citizenResults.set([]);
+      this.searchingCitizens.set(false);
+      this.cdr.detectChanges();
+      return;
+    }
+    this.searchingCitizens.set(true);
+    this.searchTimer = setTimeout(() => {
+      this.qrService.searchCitizens(q).subscribe({
+        next: (res) => {
+          this.citizenResults.set(res || []);
+          this.searchingCitizens.set(false);
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.citizenResults.set([]);
+          this.searchingCitizens.set(false);
+          this.cdr.detectChanges();
+        }
+      });
+    }, 350);
+  }
+
+  selectCitizen(citizen: User): void {
+    this.targetCitizen.set(citizen);
+    this.citizenResults.set([]);
+    this.citizenSearchQuery = '';
+    this.errorMessage.set('');
+    this.cdr.detectChanges();
   }
 
   loadPendingDeliveries(): void {
@@ -569,9 +704,9 @@ export class DeliveriesComponent implements OnInit {
   }
 
   statusLabel(status: string): string {
-    if (status === 'pending') return '⏳ Pendiente de Aprobación';
-    if (status === 'approved') return '✅ Aprobada (+Puntos Acreditados)';
-    if (status === 'rejected') return '❌ Rechazada';
+    if (status === 'pending') return ' Pendiente de Aprobación';
+    if (status === 'approved') return ' Aprobada (+Puntos Acreditados)';
+    if (status === 'rejected') return ' Rechazada';
     return status;
   }
 

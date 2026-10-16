@@ -12,10 +12,10 @@ import { Material } from '../../../core/models/material.model';
     <div class="page-container fade-in">
       <div class="page-header">
         <div>
-          <h2>♻️ Gestión de Materiales Reciclables</h2>
+          <h2><i class="bi bi-recycle text-success me-2"></i> Gestión de Materiales Reciclables</h2>
           <p style="color: #64748b; font-size: 0.95rem;">Administra las equivalencias de puntos y CO₂ por kilogramo</p>
         </div>
-        <button class="btn btn-primary" (click)="openModal()">+ Nuevo Material</button>
+        <button class="btn btn-primary" (click)="openModal()"><i class="bi bi-plus-lg me-1"></i> Nuevo Material</button>
       </div>
 
       <!-- Spinner -->
@@ -23,7 +23,7 @@ import { Material } from '../../../core/models/material.model';
 
       <!-- Alert Message -->
       <div class="alert" [ngClass]="alertType() === 'success' ? 'alert-success' : 'alert-error'" *ngIf="alertMessage()">
-        {{ alertType() === 'success' ? '✅' : '⚠️' }} {{ alertMessage() }}
+        <i class="bi me-1" [ngClass]="alertType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i> {{ alertMessage() }}
       </div>
 
       <!-- Table Card -->
@@ -43,12 +43,12 @@ import { Material } from '../../../core/models/material.model';
               <tr *ngFor="let m of materials()">
                 <td><span class="id-badge">#{{ m.id }}</span></td>
                 <td><strong>{{ m.name }}</strong></td>
-                <td><span class="pill pill-yellow">⭐ {{ m.points_per_kg }} pts/kg</span></td>
-                <td><span class="pill pill-green">🌱 {{ m.co2_kg_per_kg }} kg CO₂</span></td>
+                <td><span class="pill pill-yellow"><i class="bi bi-star-fill me-1"></i> {{ m.points_per_kg }} pts/kg</span></td>
+                <td><span class="pill pill-green"><i class="bi bi-leaf-fill me-1"></i> {{ m.co2_kg_per_kg }} kg CO₂</span></td>
                 <td style="text-align: right;">
                   <div style="display: inline-flex; gap: 6px;">
-                    <button class="btn btn-sm btn-secondary" (click)="openModal(m)">✏️ Editar</button>
-                    <button class="btn btn-sm btn-danger" (click)="confirmDelete(m)">🗑️ Eliminar</button>
+                    <button class="btn btn-sm btn-secondary" (click)="openModal(m)"><i class="bi bi-pencil-square me-1"></i> Editar</button>
+                    <button class="btn btn-sm btn-danger" (click)="confirmDelete(m)"><i class="bi bi-trash-fill me-1"></i> Eliminar</button>
                   </div>
                 </td>
               </tr>
@@ -64,8 +64,8 @@ import { Material } from '../../../core/models/material.model';
       <div class="modal-backdrop" *ngIf="showModal()">
         <div class="modal-card card">
           <div class="modal-header">
-            <h3>{{ isEditing() ? '✏️ Editar Material' : '✨ Crear Nuevo Material' }}</h3>
-            <button class="close-btn" (click)="closeModal()">✕</button>
+            <h3><i class="bi me-2" [ngClass]="isEditing() ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i> {{ isEditing() ? 'Editar Material' : 'Crear Nuevo Material' }}</h3>
+            <button class="close-btn" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <form [formGroup]="materialForm" (ngSubmit)="saveMaterial()" class="modal-body">

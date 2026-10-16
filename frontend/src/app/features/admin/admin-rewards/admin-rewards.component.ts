@@ -12,10 +12,10 @@ import { Reward } from '../../../core/models/reward.model';
     <div class="page-container fade-in">
       <div class="page-header">
         <div>
-          <h2>🎁 Gestión de Catálogo de Recompensas</h2>
+          <h2><i class="bi bi-gift-fill text-primary me-2"></i> Gestión de Catálogo de Recompensas</h2>
           <p style="color: #64748b; font-size: 0.95rem;">Crea, edita o elimina premios y bonos para la comunidad de Pamplona</p>
         </div>
-        <button class="btn btn-primary" (click)="openModal()">+ Nueva Recompensa</button>
+        <button class="btn btn-primary" (click)="openModal()"><i class="bi bi-plus-lg me-1"></i> Nueva Recompensa</button>
       </div>
 
       <!-- Spinner -->
@@ -23,7 +23,7 @@ import { Reward } from '../../../core/models/reward.model';
 
       <!-- Alert Message -->
       <div class="alert" [ngClass]="alertType() === 'success' ? 'alert-success' : 'alert-error'" *ngIf="alertMessage()">
-        {{ alertType() === 'success' ? '✅' : '⚠️' }} {{ alertMessage() }}
+        <i class="bi me-1" [ngClass]="alertType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i> {{ alertMessage() }}
       </div>
 
       <!-- Table Card -->
@@ -48,7 +48,7 @@ import { Reward } from '../../../core/models/reward.model';
                   <p style="color: #64748b; font-size: 0.8rem; margin: 2px 0 0 0;">{{ r.description }}</p>
                 </td>
                 <td><span class="pill pill-blue">{{ r.category || 'General' }}</span></td>
-                <td><span class="pill pill-yellow">⭐ {{ r.point_cost }} pts</span></td>
+                <td><span class="pill pill-yellow"><i class="bi bi-star-fill me-1"></i> {{ r.point_cost }} pts</span></td>
                 <td>
                   <span class="pill" [ngClass]="r.stock === 0 ? 'pill-red' : 'pill-green'">
                     {{ r.stock < 0 ? 'Ilimitado' : (r.stock === 0 ? 'Agotado' : r.stock + ' disp.') }}
@@ -56,8 +56,8 @@ import { Reward } from '../../../core/models/reward.model';
                 </td>
                 <td style="text-align: right;">
                   <div style="display: inline-flex; gap: 6px;">
-                    <button class="btn btn-sm btn-secondary" (click)="openModal(r)">✏️ Editar</button>
-                    <button class="btn btn-sm btn-danger" (click)="confirmDelete(r)">🗑️ Eliminar</button>
+                    <button class="btn btn-sm btn-secondary" (click)="openModal(r)"><i class="bi bi-pencil-square me-1"></i> Editar</button>
+                    <button class="btn btn-sm btn-danger" (click)="confirmDelete(r)"><i class="bi bi-trash-fill me-1"></i> Eliminar</button>
                   </div>
                 </td>
               </tr>
@@ -73,8 +73,8 @@ import { Reward } from '../../../core/models/reward.model';
       <div class="modal-backdrop" *ngIf="showModal()">
         <div class="modal-card card">
           <div class="modal-header">
-            <h3>{{ isEditing() ? '✏️ Editar Recompensa' : '✨ Crear Nueva Recompensa' }}</h3>
-            <button class="close-btn" (click)="closeModal()">✕</button>
+            <h3><i class="bi me-2" [ngClass]="isEditing() ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i> {{ isEditing() ? 'Editar Recompensa' : 'Crear Nueva Recompensa' }}</h3>
+            <button class="close-btn" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <form [formGroup]="rewardForm" (ngSubmit)="saveReward()" class="modal-body">

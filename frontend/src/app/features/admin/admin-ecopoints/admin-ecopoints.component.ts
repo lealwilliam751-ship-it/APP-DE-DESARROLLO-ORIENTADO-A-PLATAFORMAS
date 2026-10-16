@@ -12,10 +12,10 @@ import { EcoPoint } from '../../../core/models/ecopoint.model';
     <div class="page-container fade-in">
       <div class="page-header">
         <div>
-          <h2>📍 Gestión de EcoPuntos de Acopio</h2>
+          <h2><i class="bi bi-geo-alt-fill text-success me-2"></i> Gestión de EcoPuntos de Acopio</h2>
           <p style="color: #64748b; font-size: 0.95rem;">Administra las ubicaciones físicas y coordenadas de los puntos de recolección en Pamplona</p>
         </div>
-        <button class="btn btn-primary" (click)="openModal()">+ Nuevo EcoPunto</button>
+        <button class="btn btn-primary" (click)="openModal()"><i class="bi bi-plus-lg me-1"></i> Nuevo EcoPunto</button>
       </div>
 
       <!-- Spinner -->
@@ -23,7 +23,7 @@ import { EcoPoint } from '../../../core/models/ecopoint.model';
 
       <!-- Alert -->
       <div class="alert" [ngClass]="alertType() === 'success' ? 'alert-success' : 'alert-error'" *ngIf="alertMessage()">
-        {{ alertType() === 'success' ? '✅' : '⚠️' }} {{ alertMessage() }}
+        <i class="bi me-1" [ngClass]="alertType() === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i> {{ alertMessage() }}
       </div>
 
       <!-- Table Card -->
@@ -44,13 +44,13 @@ import { EcoPoint } from '../../../core/models/ecopoint.model';
               <tr *ngFor="let ep of ecopoints()">
                 <td><span class="id-badge">#{{ ep.id }}</span></td>
                 <td><strong>{{ ep.name }}</strong></td>
-                <td>📍 {{ ep.address }}</td>
+                <td><i class="bi bi-geo-alt-fill text-muted me-1"></i> {{ ep.address }}</td>
                 <td><span class="pill pill-green">{{ ep.city }}</span></td>
                 <td style="color: #64748b; font-size: 0.85rem">{{ ep.lat }}, {{ ep.lng }}</td>
                 <td style="text-align: right;">
                   <div style="display: inline-flex; gap: 6px;">
-                    <button class="btn btn-sm btn-secondary" (click)="openModal(ep)">✏️ Editar</button>
-                    <button class="btn btn-sm btn-danger" (click)="confirmDelete(ep)">🗑️ Eliminar</button>
+                    <button class="btn btn-sm btn-secondary" (click)="openModal(ep)"><i class="bi bi-pencil-square me-1"></i> Editar</button>
+                    <button class="btn btn-sm btn-danger" (click)="confirmDelete(ep)"><i class="bi bi-trash-fill me-1"></i> Eliminar</button>
                   </div>
                 </td>
               </tr>
@@ -66,8 +66,8 @@ import { EcoPoint } from '../../../core/models/ecopoint.model';
       <div class="modal-backdrop" *ngIf="showModal()">
         <div class="modal-card card">
           <div class="modal-header">
-            <h3>{{ isEditing() ? '✏️ Editar EcoPunto' : '✨ Crear Nuevo EcoPunto' }}</h3>
-            <button class="close-btn" (click)="closeModal()">✕</button>
+            <h3><i class="bi me-2" [ngClass]="isEditing() ? 'bi-pencil-square' : 'bi-plus-circle-fill'"></i> {{ isEditing() ? 'Editar EcoPunto' : 'Crear Nuevo EcoPunto' }}</h3>
+            <button class="close-btn" (click)="closeModal()"><i class="bi bi-x-lg"></i></button>
           </div>
 
           <form [formGroup]="ecopointForm" (ngSubmit)="saveEcoPoint()" class="modal-body">

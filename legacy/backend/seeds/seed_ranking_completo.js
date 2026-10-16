@@ -117,7 +117,7 @@ async function seedRanking() {
     }
 
     await client.query('COMMIT');
-    console.log('✓ Sembrado completado con éxito!');
+    console.log(' Sembrado completado con éxito!');
     console.log('Se configuraron 10 ciudadanos limpios con puntos y residuos (Kg) reales.');
   } catch (err) {
     await client.query('ROLLBACK');

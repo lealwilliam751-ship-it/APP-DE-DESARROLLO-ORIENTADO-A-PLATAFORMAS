@@ -16,20 +16,20 @@ El sistema soporta 3 flujos operativos unificados según el rol o estado del usu
 ```mermaid
 graph TD
     A["Inicio / Login"] --> B{"Autenticado?"}
-    B -- No / Modo Invitado 🟢 --> C["Vista Pública: Mapa Ecopuntos, Premios y Ranking"]
+    B -- No / Modo Invitado --> C["Vista Pública: Mapa Ecopuntos, Premios y Ranking"]
     B -- Sí --> D{"Rol del Usuario"}
     
     D -- Ciudadano --> E["Carnet QR & Pre-solicitud"]
     E --> E1["Presentar Carnet QR en EcoPunto"]
-    E --> E2["Crear Ticket de Pre-solicitud ⏳ Pendiente"]
+    E --> E2["Crear Ticket de Pre-solicitud Pendiente"]
     E --> E3["Consultar Mis Entregas e Historial"]
     E --> E4["Catálogo y Canje de Premios"]
 
     D -- Gestor de Punto --> F["Módulo de Punto de Acopio"]
     F --> F1["Escaneo de Carnet QR o Búsqueda por ID"]
-    F1 --> F2["Formulario de Pesaje en Báscula ⚖️"]
-    F2 --> F3["Aprobación Inmediata y Acreditación de Puntos ✅"]
-    F --> F4["Bandeja de Pre-solicitudes Pendientes 📥"]
+    F1 --> F2["Formulario de Pesaje en Báscula "]
+    F2 --> F3["Aprobación Inmediata y Acreditación de Puntos "]
+    F --> F4["Bandeja de Pre-solicitudes Pendientes "]
 
     D -- Administrador --> G["Dashboard Administrador"]
     G --> G1["Gestión y Registro de Gestores de Punto"]
@@ -39,19 +39,19 @@ graph TD
     G --> G5["Métricas Ejecutivas Globales en Tiempo Real"]
 ```
 
-### 0️⃣ Modo Invitado (Acceso Público)
+### 0⃣ Modo Invitado (Acceso Público)
 1. **Acceso sin Registro**: Permite ingresar desde la pantalla de login o la barra de navegación sin credenciales.
 2. **Exploración Libre**: Consulta pública de los 6 EcoPuntos oficiales de Pamplona en mapa interactivo, catálogo de recompensas y ranking de líderes en tiempo real.
 
-### 1️⃣ Flujo Presencial en el EcoPunto (Flujo Principal)
+### 1⃣ Flujo Presencial en el EcoPunto (Flujo Principal)
 1. **Llegada del Ciudadano**: Abre su "Carnet Digital QR" en la app.
 2. **Escaneo por el Gestor**: El Gestor escanea o busca la ID del QR en `/gestor/scan`.
 3. **Pantalla de Pesaje Presencial**: La app abre automáticamente la pantalla de pesaje bloqueada para dicho ciudadano.
 4. **Registro de Kilos en Báscula**: El Gestor ingresa los kilos reales pesados físicamente (ej. 2.5 kg PET, 3 kg Cartón).
 5. **Aprobación Inmediata**: Al presionar **Aprobar Entrega**, la entrega queda aprobada al instante y los EcoPuntos se acreditan de inmediato al ciudadano.
 
-### 2️⃣ Flujo de Pre-solicitud del Ciudadano (Opcional)
-1. **Pre-solicitud**: El ciudadano selecciona el EcoPunto que visitará y estima sus materiales para generar un ticket en estado `⏳ PENDIENTE`.
+### 2⃣ Flujo de Pre-solicitud del Ciudadano (Opcional)
+1. **Pre-solicitud**: El ciudadano selecciona el EcoPunto que visitará y estima sus materiales para generar un ticket en estado ` PENDIENTE`.
 2. **Bandeja del Gestor**: Al llegar al EcoPunto, el Gestor revisa la bandeja de entregas pendientes, confirma los kilos en báscula y aprueba la entrega.
 
 ---
@@ -164,8 +164,8 @@ tests/test_unified_workflow.py::test_unified_workflow_citizen_pre_solicitud_tick
 |---|---|---|---|
 | **Administrador** | `admin@ecopuntos.com` | `admin123` | CRUD de Ecopuntos, Materiales, Recompensas, Métricas, Crear Gestor |
 | **Gestor de Punto** | `gestor@ecopuntos.com` | `gestor123` | Pesaje presencial en báscula, aprobación instantánea, escáner QR |
-| **Ciudadano (1° Ranking)** | `ana@ecopuntos.com` | `eco123` | Registro/pre-solicitud, canje de premios, carnet QR, ranking |
-| **Ciudadano (2° Ranking)** | `juan@ecopuntos.com` | `eco123` | Historial de entregas, catálogo de recompensas |
+| **Ciudadano (1 Ranking)** | `ana@ecopuntos.com` | `eco123` | Registro/pre-solicitud, canje de premios, carnet QR, ranking |
+| **Ciudadano (2 Ranking)** | `juan@ecopuntos.com` | `eco123` | Historial de entregas, catálogo de recompensas |
 | **Modo Invitado** | *(Sin inicio de sesión)* | N/A | Acceso directo a Vistas Públicas (Ecopuntos, Premios, Ranking) |
 
 ---
@@ -185,33 +185,33 @@ tests/test_unified_workflow.py::test_unified_workflow_citizen_pre_solicitud_tick
 
 ```
 DESARROLLO DE LA APP DE DESARROLLO ORIENTADO A PLATAFORMAS/
-├── frontend/                     ← Angular 18+ (Standalone Components)
-│   └── src/app/
-│       ├── core/
-│       │   ├── models/           ← User, Delivery, EcoPoint, Material, Reward
-│       │   ├── services/         ← AuthService, DeliveryService, EcoPointService,
-│       │   │                        MaterialService, RewardService, AdminService, QrService
-│       │   ├── interceptors/     ← AuthInterceptor (JWT), ErrorInterceptor
-│       │   └── guards/           ← AuthGuard, RoleGuard
-│       ├── shared/               ← NavbarComponent (Navegación dinámica por rol + Invitado)
-│       └── features/             ← Admin (Metrics, Gestor, EcoPoints, Materials, Rewards),
-│                                    Gestor (Scan), Citizen (QR), Dashboard, Deliveries,
-│                                    EcoPoints Detail, Ranking, Rewards
-├── fastapi_backend/              ← FastAPI + SQLAlchemy 2.0 + Pydantic v2
-│   ├── app/
-│   │   ├── main.py               ← App FastAPI, CORSMiddleware, routers
-│   │   ├── config.py             ← Pydantic BaseSettings
-│   │   ├── database.py           ← Motor SQLAlchemy con resiliencia SQLite
-│   │   ├── security.py           ← passlib (bcrypt), python-jose (JWT), require_roles
-│   │   ├── models/models.py      ← Modelos ORM relacionales
-│   │   ├── schemas/schemas.py    ← DTOs / Schemas Pydantic v2
-│   │   └── routers/              ← auth, ecopoints, materials, deliveries,
-│   │                                rewards, ranking, admin, qr
-│   ├── tests/                    ← Suite completa de 15 pruebas automatizadas
-│   ├── requirements.txt          ← Dependencias Python con versiones
-│   └── seed_completo.py          ← Inicialización DDL y sembrado de 6 EcoPuntos de Pamplona
-├── ver_base_datos.py             ← Script para inspeccionar las tablas SQLite en consola
-├── start.bat                     ← Script de arranque rápido (FastAPI + Angular)
-└── docs/                         ← Documentación del proyecto (BD, Planes V3, Mockups v2)
+ frontend/ ← Angular 18+ (Standalone Components)
+ src/app/
+ core/
+ models/ ← User, Delivery, EcoPoint, Material, Reward
+ services/ ← AuthService, DeliveryService, EcoPointService,
+ MaterialService, RewardService, AdminService, QrService
+ interceptors/ ← AuthInterceptor (JWT), ErrorInterceptor
+ guards/ ← AuthGuard, RoleGuard
+ shared/ ← NavbarComponent (Navegación dinámica por rol + Invitado)
+ features/ ← Admin (Metrics, Gestor, EcoPoints, Materials, Rewards),
+ Gestor (Scan), Citizen (QR), Dashboard, Deliveries,
+ EcoPoints Detail, Ranking, Rewards
+ fastapi_backend/ ← FastAPI + SQLAlchemy 2.0 + Pydantic v2
+ app/
+ main.py ← App FastAPI, CORSMiddleware, routers
+ config.py ← Pydantic BaseSettings
+ database.py ← Motor SQLAlchemy con resiliencia SQLite
+ security.py ← passlib (bcrypt), python-jose (JWT), require_roles
+ models/models.py ← Modelos ORM relacionales
+ schemas/schemas.py ← DTOs / Schemas Pydantic v2
+ routers/ ← auth, ecopoints, materials, deliveries,
+ rewards, ranking, admin, qr
+ tests/ ← Suite completa de 15 pruebas automatizadas
+ requirements.txt ← Dependencias Python con versiones
+ seed_completo.py ← Inicialización DDL y sembrado de 6 EcoPuntos de Pamplona
+ ver_base_datos.py ← Script para inspeccionar las tablas SQLite en consola
+ start.bat ← Script de arranque rápido (FastAPI + Angular)
+ docs/ ← Documentación del proyecto (BD, Planes V3, Mockups v2)
 ```
 

@@ -11,16 +11,16 @@ import { AdminService } from '../../../core/services/admin.service';
     <div class="page-container fade-in">
       <div class="card form-card">
         <div class="fc-header">
-          <h2>👷 Crear o Asignar Gestor de Punto</h2>
+          <h2><i class="bi bi-person-gear me-2"></i>Crear o Asignar Gestor de Punto</h2>
           <p>Registra un nuevo usuario con perfil Gestor de Punto para operar en los EcoPuntos de Pamplona</p>
         </div>
 
         <form [formGroup]="gestorForm" (ngSubmit)="onSubmit()" class="modal-body">
           <div class="alert alert-success" *ngIf="successMessage()">
-            ✅ {{ successMessage() }}
+            <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage() }}
           </div>
           <div class="alert alert-error" *ngIf="errorMessage()">
-            ⚠️ {{ errorMessage() }}
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage() }}
           </div>
 
           <div class="form-group">
@@ -82,7 +82,7 @@ import { AdminService } from '../../../core/services/admin.service';
           </div>
 
           <button type="submit" [disabled]="submitting()" class="btn btn-primary btn-full mt-4">
-            <span *ngIf="!submitting()">✨ Registrar Gestor de Punto</span>
+            <span *ngIf="!submitting()"><i class="bi bi-person-plus-fill me-2"></i>Registrar Gestor de Punto</span>
             <span *ngIf="submitting()">Registrando gestor...</span>
           </button>
         </form>

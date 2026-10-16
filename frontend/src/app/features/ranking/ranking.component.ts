@@ -11,7 +11,7 @@ import { User } from '../../core/models/user.model';
     <div class="page-container fade-in">
       <div class="page-header">
         <div>
-          <h2>🏆 Ranking de Ciudadanos Ecológicos</h2>
+          <h2><i class="bi bi-trophy-fill text-warning me-2"></i> Ranking de Ciudadanos Ecológicos</h2>
           <p style="color: #64748b; font-size: 0.95rem;">Los recicladores con mayor impacto ambiental en Pamplona</p>
         </div>
       </div>
@@ -21,7 +21,7 @@ import { User } from '../../core/models/user.model';
 
       <!-- Empty state -->
       <div class="card empty-state" *ngIf="!loading() && topUsers().length === 0">
-        <div class="empty-icon">🏆</div>
+        <div class="empty-icon"><i class="bi bi-trophy text-muted"></i></div>
         <p>Aún no hay posiciones registradas en el ranking.</p>
       </div>
 
@@ -40,9 +40,9 @@ import { User } from '../../core/models/user.model';
             <tbody>
               <tr *ngFor="let u of topUsers(); let i = index" [class.top-three]="i < 3">
                 <td class="pos-cell">
-                  <span class="medal-badge gold" *ngIf="i === 0">🥇 1°</span>
-                  <span class="medal-badge silver" *ngIf="i === 1">🥈 2°</span>
-                  <span class="medal-badge bronze" *ngIf="i === 2">🥉 3°</span>
+                  <span class="medal-badge gold" *ngIf="i === 0"><i class="bi bi-award-fill" style="color: #eab308"></i> 1°</span>
+                  <span class="medal-badge silver" *ngIf="i === 1"><i class="bi bi-award-fill" style="color: #94a3b8"></i> 2°</span>
+                  <span class="medal-badge bronze" *ngIf="i === 2"><i class="bi bi-award-fill" style="color: #b45309"></i> 3°</span>
                   <span class="rank-num" *ngIf="i >= 3">#{{ i + 1 }}</span>
                 </td>
                 <td class="name-cell">
@@ -52,10 +52,10 @@ import { User } from '../../core/models/user.model';
                   </div>
                 </td>
                 <td>
-                  <span class="level-badge">{{ u.level || 'Semilla Verde' }}</span>
+                  <span class="level-badge"><i class="bi bi-leaf-fill text-success me-1"></i> {{ u.level || 'Semilla Verde' }}</span>
                 </td>
                 <td class="points-cell">
-                  <strong>⭐ {{ u.total_points | number }} pts</strong>
+                  <strong><i class="bi bi-star-fill text-warning me-1"></i> {{ u.total_points | number }} pts</strong>
                 </td>
               </tr>
             </tbody>

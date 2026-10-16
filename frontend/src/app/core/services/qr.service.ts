@@ -33,4 +33,9 @@ export class QrService {
   getCitizenById(citizenId: number): Observable<QRScanResponse> {
     return this.http.get<QRScanResponse>(`${this.apiUrl}/citizen/${citizenId}`);
   }
+
+  searchCitizens(q: string = ''): Observable<User[]> {
+    return this.http.get<User[]>(`${this.apiUrl}/citizens?q=${encodeURIComponent(q)}`);
+  }
 }
+

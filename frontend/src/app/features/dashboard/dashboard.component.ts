@@ -18,7 +18,7 @@ import { User } from '../../core/models/user.model';
         <div class="wb-left">
           <div class="wb-avatar">{{ user.name.charAt(0).toUpperCase() }}</div>
           <div>
-            <h2 class="wb-title">¡Hola, {{ user.name.split(' ')[0] }}! 👋</h2>
+            <h2 class="wb-title">¡Hola, {{ user.name.split(' ')[0] }}! <i class="bi bi-hand-thumbs-up-fill text-warning"></i></h2>
             <p class="wb-sub">Bienvenido al panel de <strong>EcoPuntos Pamplona</strong></p>
           </div>
         </div>
@@ -35,19 +35,16 @@ import { User } from '../../core/models/user.model';
         <!-- Ciudadano stats -->
         <div class="grid-3 mb-6" *ngIf="user.role === 'Ciudadano'">
           <div class="stat-card green">
-            <div class="stat-icon">⭐</div>
-            <div class="stat-value">{{ user.total_points | number }}</div>
+            <div class="stat-value"><i class="bi bi-star-fill text-warning me-2"></i>{{ user.total_points | number }}</div>
             <div class="stat-label">Puntos acumulados</div>
             <div class="stat-bar"><div class="stat-bar-fill" [style.width]="levelPct() + '%'"></div></div>
           </div>
           <div class="stat-card yellow">
-            <div class="stat-icon">🌱</div>
-            <div class="stat-value">{{ user.level || 'Semilla Verde' }}</div>
+            <div class="stat-value"><i class="bi bi-leaf-fill text-success me-2"></i>{{ user.level || 'Semilla Verde' }}</div>
             <div class="stat-label">Nivel ecológico actual</div>
           </div>
           <div class="stat-card blue">
-            <div class="stat-icon">📦</div>
-            <div class="stat-value">{{ deliveries().length }}</div>
+            <div class="stat-value"><i class="bi bi-box-seam-fill text-primary me-2"></i>{{ deliveries().length }}</div>
             <div class="stat-label">Entregas de reciclaje</div>
           </div>
         </div>
@@ -55,13 +52,11 @@ import { User } from '../../core/models/user.model';
         <!-- Gestor stats -->
         <div class="grid-3 mb-6" *ngIf="user.role === 'Gestor_de_Punto'">
           <div class="stat-card yellow">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-value">{{ pendingDeliveries().length }}</div>
+            <div class="stat-value"><i class="bi bi-clock-history text-warning me-2"></i>{{ pendingDeliveries().length }}</div>
             <div class="stat-label">Entregas por aprobar</div>
           </div>
           <div class="stat-card green">
-            <div class="stat-icon">📱</div>
-            <div class="stat-value">Escanear</div>
+            <div class="stat-value"><i class="bi bi-qr-code-scan text-success me-2"></i>Escanear</div>
             <div class="stat-label">Validar carnet QR de ciudadano</div>
           </div>
         </div>
@@ -69,50 +64,47 @@ import { User } from '../../core/models/user.model';
         <!-- Admin stats -->
         <div class="grid-3 mb-6" *ngIf="user.role === 'Administrador'">
           <div class="stat-card yellow">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-value">{{ pendingDeliveries().length }}</div>
+            <div class="stat-value"><i class="bi bi-clock-history text-warning me-2"></i>{{ pendingDeliveries().length }}</div>
             <div class="stat-label">Entregas pendientes</div>
           </div>
           <div class="stat-card green">
-            <div class="stat-icon">📊</div>
-            <div class="stat-value">Métricas</div>
+            <div class="stat-value"><i class="bi bi-bar-chart-line-fill text-success me-2"></i>Métricas</div>
             <div class="stat-label">Impacto ambiental global</div>
           </div>
           <div class="stat-card purple">
-            <div class="stat-icon">⚙️</div>
-            <div class="stat-value">Gestión</div>
+            <div class="stat-value"><i class="bi bi-gear-fill text-primary me-2"></i>Gestión</div>
             <div class="stat-label">Configurar catálogo y puntos</div>
           </div>
         </div>
 
         <!-- Acciones rápidas -->
         <div class="card mb-6">
-          <h3 class="section-title">⚡ Acciones rápidas</h3>
+          <h3 class="section-title"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Acciones rápidas</h3>
           <div class="quick-grid">
             <ng-container *ngIf="user.role === 'Ciudadano'">
               <a routerLink="/deliveries" class="quick-card primary">
-                <span class="qc-icon">📦</span>
+                <i class="bi bi-box-seam-fill qc-icon"></i>
                 <div class="qc-body">
                   <strong>Registrar Entrega</strong>
                   <small>Sumar EcoPuntos</small>
                 </div>
               </a>
               <a routerLink="/ecopoints" class="quick-card teal">
-                <span class="qc-icon">📍</span>
+                <i class="bi bi-geo-alt-fill qc-icon"></i>
                 <div class="qc-body">
                   <strong>EcoPuntos</strong>
                   <small>Ver mapa de acopio</small>
                 </div>
               </a>
               <a routerLink="/rewards" class="quick-card yellow">
-                <span class="qc-icon">🎁</span>
+                <i class="bi bi-gift-fill qc-icon"></i>
                 <div class="qc-body">
                   <strong>Premios</strong>
                   <small>Canjear puntos</small>
                 </div>
               </a>
               <a routerLink="/ciudadano/qr" class="quick-card orange">
-                <span class="qc-icon">🪪</span>
+                <i class="bi bi-qr-code-scan qc-icon"></i>
                 <div class="qc-body">
                   <strong>Mi Carnet QR</strong>
                   <small>Presentar en estación</small>
@@ -122,14 +114,14 @@ import { User } from '../../core/models/user.model';
 
             <ng-container *ngIf="user.role === 'Gestor_de_Punto'">
               <a routerLink="/gestor/scan" class="quick-card primary">
-                <span class="qc-icon">📱</span>
+                <i class="bi bi-qr-code-scan qc-icon"></i>
                 <div class="qc-body">
                   <strong>Escanear QR</strong>
                   <small>Validar ciudadano</small>
                 </div>
               </a>
               <a routerLink="/deliveries" class="quick-card yellow">
-                <span class="qc-icon">📋</span>
+                <i class="bi bi-check-circle-fill qc-icon"></i>
                 <div class="qc-body">
                   <strong>Aprobar Entregas</strong>
                   <small>{{ pendingDeliveries().length }} pendientes</small>
@@ -139,28 +131,28 @@ import { User } from '../../core/models/user.model';
 
             <ng-container *ngIf="user.role === 'Administrador'">
               <a routerLink="/admin/metrics" class="quick-card primary">
-                <span class="qc-icon">📊</span>
+                <i class="bi bi-bar-chart-line-fill qc-icon"></i>
                 <div class="qc-body">
                   <strong>Métricas</strong>
                   <small>Reportes de impacto</small>
                 </div>
               </a>
               <a routerLink="/admin/ecopoints" class="quick-card teal">
-                <span class="qc-icon">📍</span>
+                <i class="bi bi-geo-alt-fill qc-icon"></i>
                 <div class="qc-body">
                   <strong>Gestionar Puntos</strong>
                   <small>Puntos de acopio</small>
                 </div>
               </a>
               <a routerLink="/admin/materials" class="quick-card yellow">
-                <span class="qc-icon">♻️</span>
+                <i class="bi bi-recycle qc-icon"></i>
                 <div class="qc-body">
                   <strong>Materiales</strong>
                   <small>Precios y equivalencias</small>
                 </div>
               </a>
               <a routerLink="/admin/gestores" class="quick-card orange">
-                <span class="qc-icon">👷</span>
+                <i class="bi bi-person-badge-fill qc-icon"></i>
                 <div class="qc-body">
                   <strong>Crear Gestor</strong>
                   <small>Administrar personal</small>
@@ -173,11 +165,11 @@ import { User } from '../../core/models/user.model';
         <!-- Mis entregas recientes (Ciudadano) -->
         <div class="card" *ngIf="user.role === 'Ciudadano'">
           <div class="section-header">
-            <h3 class="section-title">📦 Mis Entregas Recientes</h3>
+            <h3 class="section-title"><i class="bi bi-box-seam-fill me-1"></i> Mis Entregas Recientes</h3>
             <a routerLink="/deliveries" class="view-all">Ver todas →</a>
           </div>
           <div class="empty-state" *ngIf="deliveries().length === 0">
-            <div class="empty-icon">♻️</div>
+            <div class="empty-icon"><i class="bi bi-recycle"></i></div>
             <p>Aún no tienes entregas registradas.</p>
             <a routerLink="/deliveries" class="btn btn-primary btn-sm" style="margin-top:12px">Hacer primera entrega</a>
           </div>
@@ -196,9 +188,9 @@ import { User } from '../../core/models/user.model';
               <tbody>
                 <tr *ngFor="let d of deliveries().slice(0,6)">
                   <td><span class="id-badge">#{{ d.id }}</span></td>
-                  <td>📍 {{ d.ecopoint_name || 'EcoPunto Pamplona' }}</td>
+                  <td><i class="bi bi-geo-alt-fill text-muted me-1"></i> {{ d.ecopoint_name || 'EcoPunto Pamplona' }}</td>
                   <td><strong style="color:#2d6a4f">+{{ d.total_points }} pts</strong></td>
-                  <td>🌱 {{ d.total_co2 }} kg</td>
+                  <td><i class="bi bi-leaf-fill text-success me-1"></i> {{ d.total_co2 }} kg</td>
                   <td>
                     <span class="pill" [ngClass]="statusClass(d.status)">
                       {{ statusLabel(d.status) }}
@@ -214,11 +206,11 @@ import { User } from '../../core/models/user.model';
         <!-- Entregas pendientes (Gestor / Admin) -->
         <div class="card" *ngIf="user.role === 'Gestor_de_Punto' || user.role === 'Administrador'">
           <div class="section-header">
-            <h3 class="section-title">📋 Entregas Pendientes de Aprobación</h3>
+            <h3 class="section-title"><i class="bi bi-clock-history me-1"></i> Entregas Pendientes de Aprobación</h3>
             <span class="badge-count" *ngIf="pendingDeliveries().length > 0">{{ pendingDeliveries().length }}</span>
           </div>
           <div class="empty-state" *ngIf="pendingDeliveries().length === 0">
-            <div class="empty-icon">✅</div>
+            <div class="empty-icon"><i class="bi bi-check-circle-fill text-success"></i></div>
             <p>No hay entregas pendientes en este momento.</p>
           </div>
           <div class="table-responsive" *ngIf="pendingDeliveries().length > 0">
@@ -235,13 +227,13 @@ import { User } from '../../core/models/user.model';
               <tbody>
                 <tr *ngFor="let p of pendingDeliveries()">
                   <td><span class="id-badge">#{{ p.id }}</span></td>
-                  <td>👤 <strong>{{ p.citizen_name || p.user_name || 'Usuario #' + p.user_id }}</strong></td>
+                  <td><i class="bi bi-person-fill text-muted me-1"></i> <strong>{{ p.citizen_name || p.user_name || 'Usuario #' + p.user_id }}</strong></td>
                   <td><strong style="color:#2d6a4f">+{{ p.total_points }} pts</strong></td>
                   <td style="color:#64748b; font-size:0.85rem">{{ p.created_at | date:'dd/MM/yyyy, h:mm a' }}</td>
                   <td style="text-align: right;">
                     <div style="display:inline-flex; gap:6px">
-                      <button class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #b7e4c7;" (click)="approveDelivery(p.id)">✓ Aprobar</button>
-                      <button class="btn btn-sm btn-danger" (click)="rejectDelivery(p.id)">✕ Rechazar</button>
+                      <button class="btn btn-sm" style="background:#dcfce7;color:#15803d;border:1px solid #b7e4c7;" (click)="approveDelivery(p.id)"><i class="bi bi-check-lg"></i> Aprobar</button>
+                      <button class="btn btn-sm btn-danger" (click)="rejectDelivery(p.id)"><i class="bi bi-x-lg"></i> Rechazar</button>
                     </div>
                   </td>
                 </tr>
@@ -300,8 +292,7 @@ import { User } from '../../core/models/user.model';
       transition: box-shadow 0.2s, transform 0.2s;
     }
     .stat-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
-    .stat-icon { font-size: 1.6rem; }
-    .stat-value { font-size: 2rem; font-weight: 800; color: #0f172a; }
+    .stat-value { font-size: 1.7rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; flex-wrap: wrap; }
     .stat-label { font-size: 0.82rem; color: #64748b; font-weight: 500; }
     .stat-bar { height: 4px; background: #f1f5f9; border-radius: 2px; margin-top: 8px; overflow: hidden; }
     .stat-bar-fill { height: 100%; background: linear-gradient(90deg, #52b788, #2d6a4f); border-radius: 2px; transition: width 1s ease; }
@@ -432,7 +423,7 @@ export class DashboardComponent implements OnInit {
   }
 
   statusLabel(s: string): string {
-    return s === 'approved' ? '✅ Aprobada' : s === 'pending' ? '⏳ Pendiente' : '❌ Rechazada';
+    return s === 'approved' ? ' Aprobada' : s === 'pending' ? ' Pendiente' : ' Rechazada';
   }
 
   statusClass(s: string): string {

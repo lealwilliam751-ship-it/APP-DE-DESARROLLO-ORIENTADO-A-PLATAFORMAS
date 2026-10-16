@@ -12,7 +12,9 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="nav-inner">
         <!-- Brand -->
         <a routerLink="/" class="brand" (click)="closeMobileMenu()">
-          <div class="brand-icon">🌱</div>
+          <div class="brand-badge">
+            <img src="assets/logo-icon.png" alt="EcoPuntos" class="brand-logo">
+          </div>
           <div class="brand-text">
             <span class="brand-name">EcoPuntos</span>
             <span class="brand-city">Pamplona</span>
@@ -22,54 +24,54 @@ import { AuthService } from '../../../core/services/auth.service';
         <!-- Desktop Menu Links -->
         <div class="nav-links desktop-only" *ngIf="authService.isLoggedIn(); else publicDesktopLinks">
           <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
-            <span class="nav-icon">🏠</span> Inicio
+            <i class="bi bi-house-door-fill"></i> Inicio
           </a>
 
           <ng-container *ngIf="isCiudadano()">
             <a routerLink="/ecopoints" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📍</span> Ecopuntos
+              <i class="bi bi-geo-alt-fill"></i> Ecopuntos
             </a>
             <a routerLink="/deliveries" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📦</span> Entregas
+              <i class="bi bi-box-seam-fill"></i> Entregas
             </a>
             <a routerLink="/rewards" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">🎁</span> Premios
+              <i class="bi bi-gift-fill"></i> Premios
             </a>
             <a routerLink="/ranking" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">🏆</span> Ranking
+              <i class="bi bi-trophy-fill"></i> Ranking
             </a>
             <a routerLink="/ciudadano/qr" routerLinkActive="active" class="nav-link qr-btn">
-              <span class="nav-icon">🪪</span> Mi QR
+              <i class="bi bi-qr-code-scan"></i> Mi QR
             </a>
           </ng-container>
 
           <ng-container *ngIf="isGestor()">
             <a routerLink="/gestor/scan" routerLinkActive="active" class="nav-link qr-btn">
-              <span class="nav-icon">📱</span> Escanear QR
+              <i class="bi bi-qr-code-scan"></i> Escanear QR
             </a>
             <a routerLink="/deliveries" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📦</span> Entregas
+              <i class="bi bi-box-seam-fill"></i> Entregas
             </a>
             <a routerLink="/ecopoints" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📍</span> Ecopuntos
+              <i class="bi bi-geo-alt-fill"></i> Ecopuntos
             </a>
           </ng-container>
 
           <ng-container *ngIf="isAdmin()">
             <a routerLink="/admin/metrics" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📊</span> Métricas
+              <i class="bi bi-bar-chart-line-fill"></i> Métricas
             </a>
             <a routerLink="/admin/ecopoints" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📍</span> Puntos
+              <i class="bi bi-geo-alt-fill"></i> Puntos
             </a>
             <a routerLink="/admin/materials" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">♻️</span> Materiales
+              <i class="bi bi-recycle"></i> Materiales
             </a>
             <a routerLink="/admin/rewards" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">🎁</span> Premios
+              <i class="bi bi-gift-fill"></i> Premios
             </a>
             <a routerLink="/admin/gestores" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">👷</span> Gestores
+              <i class="bi bi-person-badge-fill"></i> Gestores
             </a>
           </ng-container>
 
@@ -80,21 +82,21 @@ import { AuthService } from '../../../core/services/auth.service';
               <span class="user-name">{{ user.name.split(' ')[0] }}</span>
               <span class="user-role-pill" [ngClass]="roleClass(user.role)">{{ formatRole(user.role) }}</span>
             </div>
-            <span class="user-pts" *ngIf="isCiudadano()">⭐ {{ user.total_points }}</span>
-            <button class="logout-btn" (click)="logout()" title="Cerrar sesión">⏻</button>
+            <span class="user-pts" *ngIf="isCiudadano()"><i class="bi bi-star-fill text-warning"></i> {{ user.total_points }}</span>
+            <button class="logout-btn" (click)="logout()" title="Cerrar sesión"><i class="bi bi-power"></i></button>
           </div>
         </div>
 
         <ng-template #publicDesktopLinks>
           <div class="nav-links desktop-only">
             <a routerLink="/ecopoints" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">📍</span> EcoPuntos
+              <i class="bi bi-geo-alt-fill"></i> EcoPuntos
             </a>
             <a routerLink="/rewards" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">🎁</span> Premios
+              <i class="bi bi-gift-fill"></i> Premios
             </a>
             <a routerLink="/ranking" routerLinkActive="active" class="nav-link">
-              <span class="nav-icon">🏆</span> Ranking
+              <i class="bi bi-trophy-fill"></i> Ranking
             </a>
             <a routerLink="/login" routerLinkActive="active" class="nav-link">Iniciar Sesión</a>
             <a routerLink="/register" class="btn btn-primary btn-sm">Registrarse</a>
@@ -114,13 +116,15 @@ import { AuthService } from '../../../core/services/auth.service';
     <div class="mobile-drawer" [class.open]="mobileMenuOpen()">
       <div class="drawer-header">
         <div class="brand">
-          <div class="brand-icon">🌱</div>
+          <div class="brand-badge">
+            <img src="assets/logo-icon.png" alt="EcoPuntos" class="brand-logo">
+          </div>
           <div class="brand-text">
             <span class="brand-name">EcoPuntos</span>
             <span class="brand-city">Pamplona</span>
           </div>
         </div>
-        <button class="drawer-close" (click)="closeMobileMenu()">✕</button>
+        <button class="drawer-close" (click)="closeMobileMenu()"><i class="bi bi-x-lg"></i></button>
       </div>
 
       <!-- Mobile User Header -->
@@ -131,87 +135,87 @@ import { AuthService } from '../../../core/services/auth.service';
           <span class="muc-role" [ngClass]="roleClass(user.role)">{{ formatRole(user.role) }}</span>
         </div>
         <div class="muc-pts" *ngIf="isCiudadano()">
-          ⭐ <span>{{ user.total_points }}</span> pts
+           <i class="bi bi-star-fill text-warning"></i> <span>{{ user.total_points }}</span> pts
         </div>
       </div>
 
       <!-- Mobile Links -->
       <div class="mobile-menu-items" *ngIf="authService.isLoggedIn(); else publicMobileLinks">
         <a routerLink="/dashboard" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-          <span class="m-icon">🏠</span> Panel de Inicio
+          <i class="bi bi-house-door-fill m-icon"></i> Panel de Inicio
         </a>
 
         <ng-container *ngIf="isCiudadano()">
           <a routerLink="/ecopoints" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">📍</span> Puntos de Reciclaje
+            <i class="bi bi-geo-alt-fill m-icon"></i> Puntos de Reciclaje
           </a>
           <a routerLink="/deliveries" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">📦</span> Mis Entregas
+            <i class="bi bi-box-seam-fill m-icon"></i> Mis Entregas
           </a>
           <a routerLink="/rewards" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">🎁</span> Catálogo de Premios
+            <i class="bi bi-gift-fill m-icon"></i> Catálogo de Premios
           </a>
           <a routerLink="/ranking" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">🏆</span> Ranking Ecológico
+            <i class="bi bi-trophy-fill m-icon"></i> Ranking Ecológico
           </a>
           <a routerLink="/ciudadano/qr" routerLinkActive="m-active" class="m-link highlight" (click)="closeMobileMenu()">
-            <span class="m-icon">🪪</span> Mi Código QR
+            <i class="bi bi-qr-code-scan m-icon"></i> Mi Código QR
           </a>
         </ng-container>
 
         <ng-container *ngIf="isGestor()">
           <a routerLink="/gestor/scan" routerLinkActive="m-active" class="m-link highlight" (click)="closeMobileMenu()">
-            <span class="m-icon">📱</span> Escanear QR Ciudadano
+            <i class="bi bi-qr-code-scan m-icon"></i> Escanear QR Ciudadano
           </a>
           <a routerLink="/deliveries" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">📦</span> Aprobar Entregas
+            <i class="bi bi-box-seam-fill m-icon"></i> Aprobar Entregas
           </a>
           <a routerLink="/ecopoints" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">📍</span> Ecopuntos
+            <i class="bi bi-geo-alt-fill m-icon"></i> Ecopuntos
           </a>
         </ng-container>
 
         <ng-container *ngIf="isAdmin()">
           <a routerLink="/admin/metrics" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">📊</span> Panel de Métricas
+            <i class="bi bi-bar-chart-line-fill m-icon"></i> Panel de Métricas
           </a>
           <a routerLink="/admin/ecopoints" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">📍</span> Gestionar Puntos
+            <i class="bi bi-geo-alt-fill m-icon"></i> Gestionar Puntos
           </a>
           <a routerLink="/admin/materials" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">♻️</span> Gestionar Materiales
+            <i class="bi bi-recycle m-icon"></i> Gestionar Materiales
           </a>
           <a routerLink="/admin/rewards" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">🎁</span> Gestionar Premios
+            <i class="bi bi-gift-fill m-icon"></i> Gestionar Premios
           </a>
           <a routerLink="/admin/gestores" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">👷</span> Gestionar Gestores
+            <i class="bi bi-person-badge-fill m-icon"></i> Gestionar Gestores
           </a>
         </ng-container>
 
         <div class="m-divider"></div>
         <button class="m-logout-btn" (click)="logoutMobile()">
-          <span>⏻</span> Cerrar Sesión
+          <i class="bi bi-power"></i> Cerrar Sesión
         </button>
       </div>
 
       <ng-template #publicMobileLinks>
         <div class="mobile-menu-items">
           <a routerLink="/ecopoints" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">📍</span> EcoPuntos (Pamplona)
+            <i class="bi bi-geo-alt-fill m-icon"></i> EcoPuntos (Pamplona)
           </a>
           <a routerLink="/rewards" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">🎁</span> Catálogo de Premios
+            <i class="bi bi-gift-fill m-icon"></i> Catálogo de Premios
           </a>
           <a routerLink="/ranking" routerLinkActive="m-active" class="m-link" (click)="closeMobileMenu()">
-            <span class="m-icon">🏆</span> Ranking Ecológico
+            <i class="bi bi-trophy-fill m-icon"></i> Ranking Ecológico
           </a>
           <div class="m-divider"></div>
           <a routerLink="/login" class="btn btn-secondary btn-full mb-3" (click)="closeMobileMenu()">
-            🔑 Iniciar Sesión
+             <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
           </a>
           <a routerLink="/register" class="btn btn-primary btn-full" (click)="closeMobileMenu()">
-            ✨ Crear Cuenta Gratis
+             <i class="bi bi-person-plus-fill"></i> Crear Cuenta Gratis
           </a>
         </div>
       </ng-template>
@@ -244,17 +248,32 @@ import { AuthService } from '../../../core/services/auth.service';
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       text-decoration: none;
       flex-shrink: 0;
     }
-    .brand-icon {
-      font-size: 1.4rem;
-      background: rgba(82,183,136,0.25);
-      width: 38px; height: 38px;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      background: #ffffff;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+      flex-shrink: 0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .brand:hover .brand-badge {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.38);
+    }
+    .brand-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
     .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
     .brand-name {

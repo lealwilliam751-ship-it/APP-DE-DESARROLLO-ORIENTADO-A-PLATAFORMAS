@@ -85,19 +85,19 @@ Documento maestro del proceso de migracion tecnologica de EcoPuntos Pamplona. Gu
 1. **Estructura Modular (Standalone Components):**
    ```text
    frontend/src/app/
-   ├── core/
-   │   ├── guards/          # AuthGuard, RoleGuard
-   │   ├── interceptors/    # AuthInterceptor (JWT Header), ErrorInterceptor (Handling 401/403/500)
-   │   ├── models/          # TypeScript Interfaces (User, Ecopoint, Material, Delivery, Reward)
-   │   └── services/        # AuthService, EcopointService, DeliveryService, RewardService, etc.
-   ├── shared/              # Components (Navbar, Sidebar, Toast, LoadingSpinner, ConfirmationModal)
-   └── features/
-       ├── auth/            # Login, Register
-       ├── dashboard/       # Views based on roles
-       ├── ecopoints/       # Map (Leaflet) & CRUD
-       ├── deliveries/      # New Delivery Form (ReactiveForms) & Pending Approvals
-       ├── rewards/         # Catalog & Redemption History
-       └── admin/           # Management Panels (Users, Materials, Campaigns)
+    core/
+    guards/ # AuthGuard, RoleGuard
+    interceptors/ # AuthInterceptor (JWT Header), ErrorInterceptor (Handling 401/403/500)
+    models/ # TypeScript Interfaces (User, Ecopoint, Material, Delivery, Reward)
+    services/ # AuthService, EcopointService, DeliveryService, RewardService, etc.
+    shared/ # Components (Navbar, Sidebar, Toast, LoadingSpinner, ConfirmationModal)
+    features/
+        auth/ # Login, Register
+        dashboard/ # Views based on roles
+        ecopoints/ # Map (Leaflet) & CRUD
+        deliveries/ # New Delivery Form (ReactiveForms) & Pending Approvals
+        rewards/ # Catalog & Redemption History
+        admin/ # Management Panels (Users, Materials, Campaigns)
    ```
 2. **Validaciones en Formulario:** Uso intensivo de `ReactiveFormsModule` (`Validators.required`, `Validators.email`, `Validators.min(0.1)`).
 3. **Manejo de UX:** Spinners activados por llamadas a la API, Toasts de notificación para éxitos o errores de HTTP, diseño 100% Responsive.
@@ -106,18 +106,18 @@ Documento maestro del proceso de migracion tecnologica de EcoPuntos Pamplona. Gu
 1. **Estructura del Proyecto:**
    ```text
    backend/
-   ├── app/
-   │   ├── main.py          # App initialization, CORS, FastAPI routes
-   │   ├── config.py        # Settings via Pydantic BaseSettings (.env loading)
-   │   ├── database.py      # SQLAlchemy engine & SessionLocal
-   │   ├── security.py      # Passlib bcrypt hashing, JWT token creation/decoding
-   │   ├── models/          # SQLAlchemy ORM models
-   │   ├── schemas/         # Pydantic v2 schemas (In, Out, Update)
-   │   ├── routers/         # Endpoint modules (auth, ecopoints, deliveries, rewards, etc.)
-   │   └── services/        # Business logic & ACID transactions
-   ├── tests/               # Pytest integration tests
-   ├── requirements.txt
-   └── docker-compose.yml
+    app/
+    main.py # App initialization, CORS, FastAPI routes
+    config.py # Settings via Pydantic BaseSettings (.env loading)
+    database.py # SQLAlchemy engine & SessionLocal
+    security.py # Passlib bcrypt hashing, JWT token creation/decoding
+    models/ # SQLAlchemy ORM models
+    schemas/ # Pydantic v2 schemas (In, Out, Update)
+    routers/ # Endpoint modules (auth, ecopoints, deliveries, rewards, etc.)
+    services/ # Business logic & ACID transactions
+    tests/ # Pytest integration tests
+    requirements.txt
+    docker-compose.yml
    ```
 2. **Seguridad JWT:** Extracción de token Bearer, función de dependencia `get_current_user` y `require_roles(["Administrador", "Gestor_de_Punto"])`.
 3. **Manejo de Errores Standard:** Excepciones `HTTPException` con códigos adecuados (400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 409 Conflict, 422 Validation Error).

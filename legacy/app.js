@@ -6,9 +6,9 @@
 
 'use strict';
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    BASE DE DATOS LOCAL — Simula un backend con LocalStorage
-   ══════════════════════════════════════════════════════════════ */
+    */
 const DB = {
   // Tabla de usuarios (simula BD real)
   defaultUsers: [
@@ -133,14 +133,14 @@ const DB = {
   }
 };
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    ESTADO GLOBAL DE LA APLICACIÓN
-   ══════════════════════════════════════════════════════════════ */
+    */
 const STATE = {
   currentUser: null,
   selectedRewardToRedeem: null,
 
-  // ── Tipos de Residuos Colombia (PGIRS adaptado) ──
+  // Tipos de Residuos Colombia (PGIRS adaptado) 
   wasteTypes: [
     { id: 'plastico', name: 'Plástico (PET / HDPE)', pointsPerKg: 10, co2PerKg: 1.5, icon: 'fa-bottle-water', unit: 'Kg', cat: 'Plástico' },
     { id: 'vidrio', name: 'Vidrio (Botellas / Frascos)', pointsPerKg: 8, co2PerKg: 0.8, icon: 'fa-wine-bottle', unit: 'Kg', cat: 'Vidrio' },
@@ -153,7 +153,7 @@ const STATE = {
     { id: 'organico', name: 'Residuos Orgánicos Compostables', pointsPerKg: 4, co2PerKg: 0.5, icon: 'fa-apple-whole', unit: 'Kg', cat: 'Orgánico' },
   ],
 
-  // ── Puntos de Reciclaje Colombia ──
+  // Puntos de Reciclaje Colombia 
   ecoPoints: [
     {
       id: 1,
@@ -229,7 +229,7 @@ const STATE = {
     }
   ],
 
-  // ── Historial de Entregas ──
+  // Historial de Entregas 
   deliveries: [
     {
       id: 'DEL-CO-9901',
@@ -277,7 +277,7 @@ const STATE = {
     }
   ],
 
-  // ── Catálogo de Recompensas (aliados Colombia) ──
+  // Catálogo de Recompensas (aliados Colombia) 
   rewards: [
     {
       id: 1,
@@ -361,10 +361,10 @@ const STATE = {
     }
   ],
 
-  // ── Cupones Canjeados ──
+  // Cupones Canjeados 
   myVouchers: [],
 
-  // ── Campañas Ecológicas Colombia ──
+  // Campañas Ecológicas Colombia 
   campaigns: [
     {
       id: 1,
@@ -401,7 +401,7 @@ const STATE = {
     }
   ],
 
-  // ── Ranking Nacional Colombia ──
+  // Ranking Nacional Colombia 
   leaderboard: [
     { rank: 1, name: 'Sofía Martínez', avatar: 'SM', city: 'Bogotá', weightKg: 84.5, points: 2890, level: 'Héroe Ecológico' },
     { rank: 2, name: 'Juan Rodríguez', avatar: 'JR', city: 'Bogotá', weightKg: 58.2, points: 1450, level: 'Reciclador Bronce' },
@@ -411,7 +411,7 @@ const STATE = {
     { rank: 6, name: 'Laura Cardona', avatar: 'LC', city: 'Manizales', weightKg: 28.3, points: 720, level: 'Semilla Verde' },
   ],
 
-  // ── Medallas Colombia ──
+  // Medallas Colombia 
   badges: [
     { id: 1, title: 'Primer Kilo Reciclado', icon: 'fa-seedling', unlocked: true, desc: 'Entregaste tu primera libra de material reciclable.' },
     { id: 2, title: 'Maestro del PET', icon: 'fa-bottle-water', unlocked: true, desc: 'Superaste 20 Kg de plástico PET recolectado.' },
@@ -421,7 +421,7 @@ const STATE = {
     { id: 6, title: 'Separador Responsable', icon: 'fa-recycle', unlocked: true, desc: 'Realizaste 3 entregas de diferentes materiales.' },
   ],
 
-  // ── Notificaciones ──
+  // Notificaciones 
   notifications: [
     { id: 1, icon: '', text: 'Campaña "Semana Verde Colombia" activa. ¡Únete!', time: 'Hace 2h', read: false },
     { id: 2, icon: '', text: 'Tu entrega DEL-CO-9901 fue aprobada. +35 EcoPuntos acreditados.', time: 'Ayer', read: false },
@@ -429,9 +429,9 @@ const STATE = {
   ]
 };
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    MÓDULO: AUTENTICACIÓN
-   ══════════════════════════════════════════════════════════════ */
+    */
 const auth = {
   async login(e) {
     e.preventDefault();
@@ -563,9 +563,9 @@ const auth = {
   }
 };
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    MÓDULO: MAPA LEAFLET CON GPS REAL
-   ══════════════════════════════════════════════════════════════ */
+    */
 const mapModule = {
   map: null,
   markers: [],
@@ -581,7 +581,7 @@ const mapModule = {
       .setView([7.3782, -72.6475], 14);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
+      attribution: ' OpenStreetMap contributors'
     }).addTo(this.map);
 
     // Load real ecopoints from backend
@@ -677,9 +677,9 @@ const mapModule = {
   }
 };
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    MÓDULO: UI — Renderizado y Navegación
-   ══════════════════════════════════════════════════════════════ */
+    */
 const ui = {
   showApp() {
     document.getElementById('authScreen').classList.remove('active');
@@ -920,7 +920,7 @@ const ui = {
         <div class="del-item-right">
           <div class="del-points">+${d.points} pts</div>
           <span class="del-status-text ${d.status === 'approved' ? 'text-emerald' : 'text-amber'}">
-            ${d.status === 'approved' ? ' Aprobada' : '⏳ Pendiente'}
+            ${d.status === 'approved' ? ' Aprobada' : ' Pendiente'}
           </span>
           ${canApprove ? `
             <div style="display:flex;gap:4px;margin-top:5px;">
@@ -1085,7 +1085,7 @@ const ui = {
     if (pendingList) {
       pendingList.innerHTML = pending.length ? pending.map(d => `
         <div class="admin-pending-card">
-          <h5>⏳ ${d.wasteName} — ${d.amount} ${d.unit}</h5>
+          <h5> ${d.wasteName} — ${d.amount} ${d.unit}</h5>
           <p>${d.pointName} · ${d.date} · ID: ${d.id}</p>
           <div class="admin-pending-actions">
             <button class="btn btn-sm btn-emerald" onclick="app.approveDelivery('${d.id}')"> Aprobar</button>
@@ -1146,7 +1146,7 @@ const ui = {
     });
   },
 
-  // ── Renderizado dinámico del Dock según rol ──
+  // Renderizado dinámico del Dock según rol 
   renderRoleDock() {
     const role = STATE.currentUser?.role;
     const dock = document.getElementById('mobileDock');
@@ -1210,7 +1210,7 @@ const ui = {
     }
   },
 
-  // ── Renderiza contenido de Inicio según rol ──
+  // Renderiza contenido de Inicio según rol 
   renderRoleHome() {
     const role = STATE.currentUser?.role;
     const banner = document.getElementById('roleBannerSection');
@@ -1272,9 +1272,9 @@ const ui = {
   }
 };
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    MÓDULO: GRÁFICOS (Chart.js)
-   ══════════════════════════════════════════════════════════════ */
+    */
 const charts = {
   impactChart: null,
   adminChart: null,
@@ -1312,9 +1312,9 @@ const charts = {
   }
 };
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    MÓDULO: ACCIONES DE LA APP (Entregas, Premios, Puntos, etc.)
-   ══════════════════════════════════════════════════════════════ */
+    */
 const app = {
   _html5QrScanner: null,
 
@@ -1339,7 +1339,7 @@ const app = {
     }
   },
 
-  // ── Modal de entrega ──
+  // Modal de entrega 
   openDeliveryModal() {
     document.getElementById('deliveryModal').classList.add('active');
     this.updateDeliveryCalc();
@@ -1420,7 +1420,7 @@ const app = {
     ui.showToast(user.role !== 'citizen' ? ` Entrega aprobada. +${pts} EcoPuntos acreditados.` : ` Entrega enviada. Pendiente de validación en el punto.`);
   },
 
-  // ── Aprobación desde admin / gestor ──
+  // Aprobación desde admin / gestor 
   async approveDelivery(deliveryId) {
     const del = STATE.deliveries.find(d => d.id == deliveryId || d.apiId == deliveryId);
     if (del) del.status = 'approved';
@@ -1467,7 +1467,7 @@ const app = {
     ui.renderDeliveriesList(status);
   },
 
-  // ── Perfil de Usuario ──
+  // Perfil de Usuario 
   openProfileModal() {
     const u = STATE.currentUser;
     if (!u) return;
@@ -1485,7 +1485,7 @@ const app = {
     document.getElementById('profileModal').classList.add('active');
   },
 
-  // ── QR Ciudadano ──
+  // QR Ciudadano 
   openQrModal() {
     document.getElementById('qrModal').classList.add('active');
     this.generateUserQrCode();
@@ -1517,7 +1517,7 @@ const app = {
     document.getElementById('qrCodeUserText').textContent = STATE.currentUser.id;
   },
 
-  // ── Escáner QR Real (Trabajador / Admin) ──
+  // Escáner QR Real (Trabajador / Admin) 
   openScannerModal() {
     document.getElementById('scannerModal').classList.add('active');
     setTimeout(() => this._startQrScanner(), 300);
@@ -1585,7 +1585,7 @@ const app = {
     this.openDeliveryModal();
   },
 
-  // ── Recompensas ──
+  // Recompensas 
   openRewardModal(rewardId) {
     const reward = STATE.rewards.find(r => r.id === rewardId);
     if (!reward) return;
@@ -1639,7 +1639,7 @@ const app = {
     ui.showToast(` Canje exitoso: ${reward.title}! Revisa tus cupones.`);
   },
 
-  // ── Puntos Ecológicos ──
+  // Puntos Ecológicos 
   openNewPointModal() { document.getElementById('newPointModal').classList.add('active'); },
 
   submitNewPoint(e) {
@@ -1668,7 +1668,7 @@ const app = {
     ui.showToast(` Punto Ecológico "${name}" creado exitosamente.`);
   },
 
-  // ── Campañas ──
+  // Campañas 
   openNewCampaignModal() { document.getElementById('newCampaignModal').classList.add('active'); },
 
   submitNewCampaign(e) {
@@ -1710,9 +1710,9 @@ const app = {
   }
 };
 
-/* ══════════════════════════════════════════════════════════════
+/* 
    INICIALIZACIÓN DE LA APLICACIÓN
-   ══════════════════════════════════════════════════════════════ */
+    */
 document.addEventListener('DOMContentLoaded', async () => {
 
   // Inicializar estado persistido desde LocalStorage

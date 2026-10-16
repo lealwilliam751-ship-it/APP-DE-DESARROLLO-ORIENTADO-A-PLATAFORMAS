@@ -13,7 +13,7 @@ import jsQR from 'jsqr';
     <div class="page-container fade-in">
       <div class="card scan-card">
         <div class="fc-header">
-          <h2>📱 Validar Carnet Digital (Código QR)</h2>
+          <h2><i class="bi bi-qr-code-scan me-2"></i>Validar Carnet Digital (Código QR)</h2>
           <p>Escanea o sube una imagen de código QR para verificar al ciudadano y registrar su entrega</p>
         </div>
 
@@ -26,14 +26,14 @@ import jsQR from 'jsqr';
               [class.active]="scanMode() === 'image'"
               (click)="setScanMode('image')"
             >
-              🖼️ Subir Imagen de QR
+              <i class="bi bi-image me-1"></i> Subir Imagen de QR
             </button>
             <button
               class="scan-tab-btn"
               [class.active]="scanMode() === 'manual'"
               (click)="setScanMode('manual')"
             >
-              ⌨️ Código Manual / JSON
+              <i class="bi bi-keyboard me-1"></i> Código Manual / JSON
             </button>
           </div>
 
@@ -55,7 +55,7 @@ import jsQR from 'jsqr';
               />
 
               <div *ngIf="!selectedImagePreview()" class="dz-prompt">
-                <div class="dz-icon">📷</div>
+                <div class="dz-icon"><i class="bi bi-cloud-arrow-up-fill text-success"></i></div>
                 <strong>Haz clic aquí o arrastra la imagen del código QR</strong>
                 <p>Soporta capturas de pantalla, fotos JPG, PNG o WEBP</p>
               </div>
@@ -65,7 +65,7 @@ import jsQR from 'jsqr';
                 <div class="dz-preview-info">
                   <span>{{ selectedFileName() }}</span>
                   <button type="button" class="btn btn-sm btn-secondary" (click)="clearImage($event)">
-                    🔄 Cambiar Imagen
+                    <i class="bi bi-arrow-repeat me-1"></i> Cambiar Imagen
                   </button>
                 </div>
               </div>
@@ -91,13 +91,13 @@ import jsQR from 'jsqr';
 
           <!-- Error Alert -->
           <div *ngIf="errorMessage()" class="alert alert-error mt-4">
-            ⚠️ {{ errorMessage() }}
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage() }}
           </div>
 
           <!-- Scan Result Card -->
           <div *ngIf="scanResult() as res" class="citizen-result-card fade-in">
             <div class="result-header">
-              <span class="pill pill-green">✅ Ciudadano Validado en Sistema</span>
+              <span class="pill pill-green"><i class="bi bi-check-circle-fill me-1"></i> Ciudadano Validado en Sistema</span>
             </div>
 
             <div class="citizen-details">
@@ -111,16 +111,16 @@ import jsQR from 'jsqr';
               </div>
               <div class="detail-item">
                 <span class="label">Nivel Ecológico:</span>
-                <span class="pill pill-blue">{{ res.citizen.level || 'Semilla Verde' }}</span>
+                <span class="pill pill-blue"><i class="bi bi-leaf-fill text-success me-1"></i>{{ res.citizen.level || 'Semilla Verde' }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Puntos Acumulados:</span>
-                <span class="val points-val">⭐ {{ res.citizen.total_points | number }} pts</span>
+                <span class="val points-val"><i class="bi bi-star-fill text-warning me-1"></i> {{ res.citizen.total_points | number }} pts</span>
               </div>
             </div>
 
             <button (click)="goToDeliveries(res.citizen.id)" class="btn btn-primary btn-full mt-3">
-              📦 Registrar Entrega para este Ciudadano →
+              <i class="bi bi-box-seam me-1"></i> Registrar Entrega para este Ciudadano <i class="bi bi-arrow-right ms-1"></i>
             </button>
           </div>
 

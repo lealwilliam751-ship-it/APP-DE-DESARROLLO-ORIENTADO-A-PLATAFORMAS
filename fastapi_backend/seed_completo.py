@@ -33,7 +33,7 @@ def seed_database():
     db: Session = SessionLocal()
 
     try:
-        # ── 1. Materiales ─────────────────────────────────────────────
+        # 1. Materiales 
         if db.query(Material).count() == 0:
             materials = [
                 Material(name="Plastico PET",      points_per_kg=50,  co2_kg_per_kg=1.5),
@@ -61,11 +61,11 @@ def seed_database():
         mat_papel  = find_mat("carton", "papel")
         mat_metal  = find_mat("metal", "aluminio")
 
-        # ── 2. Ecopuntos Reales e Investigados de Pamplona, Norte de Santander ───
+        # 2. Ecopuntos Reales e Investigados de Pamplona, Norte de Santander 
         real_ecopoints_data = [
             dict(name="Centro de Acopio Asociación Renacer", address="Carrera 6 #1-15, Sector Chapinero (Planta Km 3 Vía La Cortada)", city="Pamplona", lat=7.3785, lng=-72.6460),
-            dict(name="Punto Limpio Empopamplona S.A. E.S.P.", address="Carrera 6 N° 4-65, Barrio Centro", city="Pamplona", lat=7.3758, lng=-72.6483),
-            dict(name="Asociación Ecología y Paz",            address="Carrera 8 N° 2-10, Barrio Centro", city="Pamplona", lat=7.3770, lng=-72.6490),
+            dict(name="Punto Limpio Empopamplona S.A. E.S.P.", address="Carrera 6 N 4-65, Barrio Centro", city="Pamplona", lat=7.3758, lng=-72.6483),
+            dict(name="Asociación Ecología y Paz", address="Carrera 8 N 2-10, Barrio Centro", city="Pamplona", lat=7.3770, lng=-72.6490),
             dict(name="Ecopunto Unipamplona Campus Principal",address="Ciudad Universitaria, Km 1 Vía Bucaramanga", city="Pamplona", lat=7.3820, lng=-72.6515),
             dict(name="Ecopunto Parque Águeda Gallardo",    address="Calle 6 con Carrera 5, Centro Histórico", city="Pamplona", lat=7.3765, lng=-72.6480),
             dict(name="Ecopunto Plazuela Almeyda",          address="Carrera 4 con Calle 7, Barrio El Carmen", city="Pamplona", lat=7.3795, lng=-72.6455),
@@ -117,7 +117,7 @@ def seed_database():
 
         ep = db.query(EcoPoint).first()
 
-        # ── 3. Usuarios (admin + gestor + 10 ciudadanos) ──────────────
+        # 3. Usuarios (admin + gestor + 10 ciudadanos) 
         users_data = [
             # Roles de gestión
             dict(name="Administrador EcoPuntos", email="admin@ecopuntos.com",
@@ -163,7 +163,7 @@ def seed_database():
         db.flush()
         print("  Usuarios procesados (2 de gestion + 10 ciudadanos para ranking).")
 
-        # ── 4. Recompensas ────────────────────────────────────────────
+        # 4. Recompensas 
         if db.query(Reward).count() == 0:
             rewards = [
                 Reward(name="Bono $10.000 Mercado Ecologico", description="Descuento en tiendas asociadas de Pamplona", category="Descuentos", point_cost=100, stock=50),
@@ -177,7 +177,7 @@ def seed_database():
         else:
             print("  Recompensas ya existentes, omitiendo.")
 
-        # ── 5. Entregas aprobadas por ciudadano ───────────────────────
+        # 5. Entregas aprobadas por ciudadano 
         ciudadanos = db.query(User).filter(User.role == UserRole.Ciudadano).all()
         ciudadanos_by_email = {u.email: u for u in ciudadanos}
         ana_user = ciudadanos_by_email.get("ana@ecopuntos.com")

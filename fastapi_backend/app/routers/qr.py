@@ -43,11 +43,29 @@ def scan_qr(
     citizen = db.query(User).filter(User.id == int(user_id)).first()
     if not citizen:
         raise HTTPException(status_code=404, detail="Ciudadano no encontrado.")
+    if citizen.role != UserRole.Ciudadano:
+        raise HTTPException(status_code=400, detail="El código QR escaneado no corresponde a una cuenta de Ciudadano.")
 
     return {
         "valid": True,
         "citizen": UserOut.model_validate(citizen)
     }
+
+@router.get("/citizens")
+def search_citizens(
+    q: str = "",
+    db: Session = Depends(get_db),
+    gestor: User = Depends(require_roles([UserRole.Gestor_de_Punto, UserRole.Administrador]))
+):
+    query = db.query(User).filter(User.role == UserRole.Ciudadano)
+    if q and q.strip():
+        term = f"%{q.strip()}%"
+        if q.strip().isdigit():
+            query = query.filter((User.id == int(q.strip())) | (User.name.ilike(term)) | (User.email.ilike(term)))
+        else:
+            query = query.filter((User.name.ilike(term)) | (User.email.ilike(term)))
+    citizens = query.order_by(User.name.asc()).limit(20).all()
+    return [UserOut.model_validate(c) for c in citizens]
 
 @router.get("/citizen/{citizen_id}")
 def get_citizen_by_id(
@@ -58,9 +76,12 @@ def get_citizen_by_id(
     citizen = db.query(User).filter(User.id == citizen_id).first()
     if not citizen:
         raise HTTPException(status_code=404, detail="Ciudadano no encontrado.")
+    if citizen.role != UserRole.Ciudadano:
+        raise HTTPException(status_code=400, detail="El usuario especificado no tiene rol de Ciudadano.")
 
     return {
         "valid": True,
         "citizen": UserOut.model_validate(citizen)
     }
+
 

@@ -12,7 +12,7 @@ import { Reward, RedeemedReward } from '../../core/models/reward.model';
     <div class="page-container fade-in">
       <div class="page-header">
         <div>
-          <h2>🎁 Catálogo de Recompensas</h2>
+          <h2><i class="bi bi-gift-fill text-primary me-2"></i> Catálogo de Recompensas</h2>
           <p style="color: #64748b; font-size: 0.95rem;">Canjea tus EcoPuntos acumulados por increíbles premios y beneficios sostenibles</p>
         </div>
       </div>
@@ -20,18 +20,18 @@ import { Reward, RedeemedReward } from '../../core/models/reward.model';
       <!-- User balance notice -->
       <div class="card balance-card mb-6" *ngIf="authService.currentUser() as user">
         <div class="bc-left">
-          <span class="bc-icon">⭐</span>
+          <span class="bc-icon"><i class="bi bi-star-fill text-warning"></i></span>
           <div>
             <div class="bc-title">Tus EcoPuntos Disponibles</div>
             <div class="bc-points">{{ user.total_points | number }} pts</div>
           </div>
         </div>
-        <div class="bc-badge">{{ user.level || 'Semilla Verde' }}</div>
+        <div class="bc-badge"><i class="bi bi-leaf-fill me-1"></i> {{ user.level || 'Semilla Verde' }}</div>
       </div>
 
       <!-- System message -->
       <div class="alert alert-info" *ngIf="message()">
-        ℹ️ {{ message() }}
+         <i class="bi bi-info-circle-fill me-1"></i> {{ message() }}
       </div>
 
       <!-- Loading spinner -->
@@ -39,7 +39,7 @@ import { Reward, RedeemedReward } from '../../core/models/reward.model';
 
       <!-- Empty state -->
       <div class="card empty-state" *ngIf="!loading() && rewards().length === 0">
-        <div class="empty-icon">🎁</div>
+        <div class="empty-icon"><i class="bi bi-gift text-muted"></i></div>
         <p>No hay premios disponibles en este momento.</p>
       </div>
 
@@ -54,7 +54,7 @@ import { Reward, RedeemedReward } from '../../core/models/reward.model';
           </div>
 
           <div class="rc-body">
-            <div class="rc-icon">🎉</div>
+            <div class="rc-icon"><i class="bi bi-gift-fill text-primary"></i></div>
             <h3 class="rc-title">{{ r.name }}</h3>
             <p class="rc-desc">{{ r.description }}</p>
           </div>
@@ -62,7 +62,7 @@ import { Reward, RedeemedReward } from '../../core/models/reward.model';
           <div class="rc-footer">
             <div class="rc-cost">
               <span class="cost-label">Costo:</span>
-              <strong class="cost-val">⭐ {{ r.point_cost }} pts</strong>
+              <strong class="cost-val"><i class="bi bi-star-fill text-warning me-1"></i> {{ r.point_cost }} pts</strong>
             </div>
 
             <button
@@ -78,7 +78,7 @@ import { Reward, RedeemedReward } from '../../core/models/reward.model';
 
       <!-- History Table -->
       <div class="card" *ngIf="history().length > 0">
-        <h3 style="color: #1b4332; margin-bottom: 16px;">📜 Mi Historial de Canjes</h3>
+        <h3 style="color: #1b4332; margin-bottom: 16px;"><i class="bi bi-journal-text text-success me-2"></i> Mi Historial de Canjes</h3>
         <div class="table-responsive">
           <table class="data-table">
             <thead>

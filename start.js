@@ -23,7 +23,7 @@ function liberarPuerto(puerto) {
         if (pid && !isNaN(pid)) {
           try {
             execSync(`taskkill /F /PID ${pid}`, { encoding: 'utf8' });
-            console.log(`  ✓ Puerto ${puerto} liberado (PID ${pid})`);
+            console.log(` Puerto ${puerto} liberado (PID ${pid})`);
           } catch (_) {}
         }
       });
@@ -41,7 +41,7 @@ console.log(' INICIANDO ECOPUNTOS PAMPLONA (FastAPI + Angular)');
 console.log('----------------------------------------------------\n');
 
 // 1. Iniciar FastAPI Backend (Puerto 3000)
-console.log('⚡ Iniciando FastAPI Backend en http://localhost:3000...');
+console.log(' Iniciando FastAPI Backend en http://localhost:3000...');
 const backendProcess = spawn('python', ['-m', 'uvicorn', 'app.main:app', '--reload', '--port', '3000'], {
   cwd: FASTAPI_DIR,
   stdio: 'inherit',
@@ -49,7 +49,7 @@ const backendProcess = spawn('python', ['-m', 'uvicorn', 'app.main:app', '--relo
 });
 
 // 2. Iniciar Angular Frontend (Puerto 4200) y abrir navegador
-console.log('⚡ Iniciando Angular Frontend en http://localhost:4200...\n');
+console.log(' Iniciando Angular Frontend en http://localhost:4200...\n');
 const frontendProcess = spawn('npx', ['ng', 'serve', '--port', '4200', '--open'], {
   cwd: FRONTEND_DIR,
   stdio: 'inherit',
